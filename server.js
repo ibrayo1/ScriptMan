@@ -1,0 +1,7 @@
+let express = require('express')
+let http = require('http')
+let path = require('path')
+let socketIO = require('socket.io')
+let app = express()
+let server = http.Server(app)
+let io = socketIO(server)
