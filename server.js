@@ -9,7 +9,7 @@ var players = {}
 
 // not sure if this is correct but oh well
 app.use(express.static(__dirname + '/lib'))
-app.get('/', function(req, res){
+app.get('/static', function(req, res){
     res.sendFile(__dirname + '/index.html')
 })
 server.listen(8080, ()=>{
