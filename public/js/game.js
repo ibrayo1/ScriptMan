@@ -75,29 +75,11 @@ function create() {
   this.socket.on('playerMoved', function (playerInfo) {
     self.otherPlayers.getChildren().forEach(function (otherPlayer) {
       if (playerInfo.playerId === otherPlayer.playerId) {
-        otherPlayer.setRotation(playerInfo.rotation);
+        otherPlayer.setAngle(playerInfo.angle);
         otherPlayer.setPosition(playerInfo.x, playerInfo.y);
       }
     });
   });
-
-  /*
-  // adds player to the center of the world map
-  player = this.physics.add.sprite((14 * 16) + 8, (17 * 16) + 8, 'pacman', 0);
-  player.setSize(16, 16);
-  player.setCollideWorldBounds(true);
-
-  // create the pacman munch animation
-  this.anims.create({
-    key: 'munch',
-    frames: this.anims.generateFrameNumbers('pacman', {start: 0, end: 2}),
-    frameRate: 15,
-    repeat: -1
-  });
-
-  // play the animation
-  player.play('munch');
-  */
 
   // define cursors as standard arrow keys
   cursors = this.input.keyboard.createCursorKeys();
@@ -111,22 +93,27 @@ function update(time, delta) {
     // Horizontal movement
     if (cursors.left.isDown) {
       this.pacman.body.setVelocityX(-150);
+      this.pacman.angle = 180;
     } else if (cursors.right.isDown) {
       this.pacman.body.setVelocityX(150);
+      this.pacman.angle = 0;
     }
 
     // Vertical movement
     if (cursors.up.isDown) {
       this.pacman.body.setVelocityY(-150);
+      this.pacman.angle = 270;
     } else if (cursors.down.isDown) {
       this.pacman.body.setVelocityY(150);
+      this.pacman.angle = 90;
     }
 
     // emit player movement
     var x = this.pacman.x;
     var y = this.pacman.y;
-    if (this.pacman.oldPosition && (x !== this.pacman.oldPosition.x || y !== this.pacman.oldPosition.y)) {
-      this.socket.emit('playerMovement', { x: this.pacman.x, y: this.pacman.y });
+    var a = this.pacman.angle;
+    if (this.pacman.oldPosition && (x !== this.pacman.oldPosition.x || y !== this.pacman.oldPosition.y || a !== this.pacman.oldPosition.angle)) {
+      this.socket.emit('playerMovement', { x: this.pacman.x, y: this.pacman.y, angle: this.pacman.angle });
     }
     
     // save old position data
