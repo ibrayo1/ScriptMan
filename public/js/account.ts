@@ -6,6 +6,7 @@ export class Account {
     rotation: number
     x: number
     y: number
+    angle: number
     // Basic constructor. On account creation you only need two things:
     //      1: the username the account chooses
     //      2: the ID number the account will be assigned
