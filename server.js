@@ -20,13 +20,8 @@ io.on('connection', function (socket) {
     (14 * 16) + 8, // x
     (17 * 16) + 8, // y
     0, // rotation
-  ) //{
-  //  rotation: 0,
-  //  x: (14 * 16) + 8,
-  //  y: (17 * 16) + 8,
-  //  playerId: socket.id,
-  //  team: (Math.floor(Math.random() * 2) == 0) ? 'red' : 'blue'
-  //};
+  );
+  
   // send the players object to the new player
   socket.emit('currentPlayers', players);
   // update all other players of the new player
