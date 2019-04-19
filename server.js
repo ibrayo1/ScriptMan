@@ -5,6 +5,10 @@ var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 var players = {};
+var dot = {
+  x: 30,
+  y: 30
+}
 
 app.use(express.static(__dirname + '/public'));
  
@@ -20,10 +24,12 @@ io.on('connection', function (socket) {
     (14 * 16) + 8, // x
     (17 * 16) + 8, // y
     0, // rotation
+    0 // score
   );
   
   // send the players object to the new player
   socket.emit('currentPlayers', players);
+  socket.emit('dotLocation', dot);
   // update all other players of the new player
   socket.broadcast.emit('newPlayer', players[socket.id]);
  
@@ -45,10 +51,15 @@ io.on('connection', function (socket) {
     socket.broadcast.emit('playerMoved', players[socket.id]);
   });
 
-  socket.on('playerEatDot', function (gameData){
-    players[socket.id].world = gameData.world;
-    socket.broadcast.emit('playerAteDot', players[socket.id]);
+  socket.on('dotCollected', function () {
+    //players[socket.id].score += 10;
+    
+    dot.x = 60;
+    dot.y = 60;
+    io.emit('dotLocation', dot);
+    //io.emit('scoreUpdate', scores);
   });
+
 });
 
 server.listen(3000, function () {

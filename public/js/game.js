@@ -39,6 +39,7 @@ function create() {
   worldMap.setCollisionByExclusion([7,14]);
 
   // Create a physics group - useful for colliding the player against all the dots
+  /*
   this.dotGroup = this.physics.add.staticGroup();
   worldMap.forEachTile( tile => {
     if (tile.index === 7) {
@@ -50,6 +51,7 @@ function create() {
       worldMap.removeTileAt(tile.x, tile.y);
     }
   });
+  */
 
   // create the pacman munch animation
   this.anims.create({
@@ -88,7 +90,7 @@ function create() {
     });
   });
 
-  //listen for player movements
+  // listen for player movements
   this.socket.on('playerMoved', function (playerInfo) {
     self.otherPlayers.getChildren().forEach(function (otherPlayer) {
       if (playerInfo.playerId === otherPlayer.playerId) {
@@ -96,6 +98,14 @@ function create() {
         otherPlayer.setPosition(playerInfo.x, playerInfo.y);
       }
     });
+  });
+
+  this.socket.on('dotLocation', function (dotLocation) {
+    if (self.dot) self.dot.destroy();
+    self.dot = self.physics.add.image(dotLocation.x, dotLocation.y, 'dot');
+    self.physics.add.overlap(self.pacman, self.dot, function () {
+      this.socket.emit('dotCollected');
+    }, null, self);
   });
 
   // define cursors as standard arrow keys
@@ -138,7 +148,7 @@ function update(time, delta) {
     };
 
     // checks to see if pacman overlaps with dots if so then eats them
-    this.physics.add.overlap(this.pacman, this.dotGroup, eatDot, null, this);
+    // this.physics.add.overlap(this.pacman, this.dotGroup, eatDot, null, this);
   }
 }
 
