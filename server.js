@@ -1,4 +1,6 @@
 var express = require('express');
+// This imports the account class from the Account.js file
+const { Account } = require(__dirname + '/public/js/account.js');
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
@@ -13,13 +15,18 @@ app.get('/', function (req, res) {
 io.on('connection', function (socket) {
   console.log('a user connected');
   // create a new player and add it to our players object
-  players[socket.id] = {
-    rotation: 0,
-    x: (14 * 16) + 8,
-    y: (17 * 16) + 8,
-    playerId: socket.id,
-    team: (Math.floor(Math.random() * 2) == 0) ? 'red' : 'blue'
-  };
+  players[socket.id] = new Account(
+    socket.id, // ID
+    (14 * 16) + 8, // x
+    (17 * 16) + 8, // y
+    0, // rotation
+  ) //{
+  //  rotation: 0,
+  //  x: (14 * 16) + 8,
+  //  y: (17 * 16) + 8,
+  //  playerId: socket.id,
+  //  team: (Math.floor(Math.random() * 2) == 0) ? 'red' : 'blue'
+  //};
   // send the players object to the new player
   socket.emit('currentPlayers', players);
   // update all other players of the new player
