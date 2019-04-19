@@ -73,9 +73,13 @@ function create() {
       }
     });
   });
+
+  // checks for new players added onto server
   this.socket.on('newPlayer', function (playerInfo) {
     addOtherPlayers(self, playerInfo, worldMap);
   });
+
+  // checks for players that disconnect
   this.socket.on('disconnect', function (playerId) {
     self.otherPlayers.getChildren().forEach(function (otherPlayer) {
       if (playerId === otherPlayer.playerId) {
