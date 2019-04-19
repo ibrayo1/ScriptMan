@@ -23,6 +23,7 @@ function preload() {
 
   // graphics (C)opyright Namco
   this.load.image('dot', 'assets/dot.png');
+  this.load.image('Hallenbeck', 'assets/Hallenbeck.png');
   this.load.image('tiles', 'assets/pacman-tiles.png');
   this.load.spritesheet('pacman', 'assets/pacman.png', {frameWidth: 32, frameHeight: 32});
   this.load.tilemapTiledJSON('map', 'assets/pacman-map.json');
@@ -102,7 +103,7 @@ function create() {
 
   this.socket.on('dotLocation', function (dotLocation) {
     if (self.dot) self.dot.destroy();
-    self.dot = self.physics.add.image(dotLocation.x, dotLocation.y, 'dot');
+    self.dot = self.physics.add.image(dotLocation.x, dotLocation.y, 'Hallenbeck');
     self.physics.add.overlap(self.pacman, self.dot, function () {
       this.socket.emit('dotCollected');
     }, null, self);
