@@ -38,6 +38,19 @@ function create() {
   // 7 maps to dots and 14 maps to open spaces
   worldMap.setCollisionByExclusion([7,14]);
 
+  // Create a physics group - useful for colliding the player against all the dots
+  this.dotGroup = this.physics.add.staticGroup();
+  worldMap.forEachTile( tile => {
+    if (tile.index === 7) {
+      // A sprite has its origin at the center, so place the sprite at the center of the tile
+      const x = tile.getCenterX();
+      const y = tile.getCenterY();
+      const dot = this.dotGroup.create(x, y, "dot");
+
+      worldMap.removeTileAt(tile.x, tile.y);
+    }
+  });
+
   // create the pacman munch animation
   this.anims.create({
     key: 'munch',
@@ -84,8 +97,6 @@ function create() {
   // define cursors as standard arrow keys
   cursors = this.input.keyboard.createCursorKeys();
 
-  //this.physics.add.collider(player, worldMap);
-
 }
 
 function update(time, delta) {
@@ -121,6 +132,9 @@ function update(time, delta) {
       x: this.pacman.x,
       y: this.pacman.y
     };
+
+    // checks to see if pacman overlaps with dots if so then eats them
+    this.physics.add.overlap(this.pacman, this.dotGroup, eatDot, null, this);
   }
 }
 
@@ -132,6 +146,7 @@ function addPlayer(self, playerInfo, worldMap) {
   // play the animation
   self.pacman.play('munch');
 
+  // check for wall collisions
   self.physics.add.collider(self.pacman, worldMap);
 }
 
@@ -146,5 +161,18 @@ function addOtherPlayers(self, playerInfo, worldMap) {
   self.otherPlayer.playerId = playerInfo.playerId;
   self.otherPlayers.add(self.otherPlayer);
 
+  // check for wall collisions
   self.physics.add.collider(self.otherPlayer, worldMap);
+}
+
+// eat function
+function eatDot( pacman, dot ){
+  dot.disableBody(true, true); //disables the bodies of the 
+
+  // enables all of the starts back onto the map
+  if (this.dotGroup.countActive(true) === 0){
+    this.dotGroup.children.iterate(function (child) {
+      child.enableBody(true, child.x, child.y, true, true);
+    })
+  }
 }

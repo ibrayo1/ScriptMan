@@ -44,6 +44,11 @@ io.on('connection', function (socket) {
     // emit a message to all players about the player that moved
     socket.broadcast.emit('playerMoved', players[socket.id]);
   });
+
+  socket.on('playerEatDot', function (gameData){
+    players[socket.id].world = gameData.world;
+    socket.broadcast.emit('playerAteDot', players[socket.id]);
+  });
 });
 
 server.listen(3000, function () {
