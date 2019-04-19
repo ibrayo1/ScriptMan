@@ -23,7 +23,7 @@ function preload() {
 
   // graphics (C)opyright Namco
   this.load.image('dot', 'assets/dot.png');
-  this.load.image('Hallenbeck', 'assets/Hallenbeck.png');
+  this.load.image('Hallenbeck', 'assets/Hallenbeck.png', {frameWidth: 32, frameHeight: 32});
   this.load.image('tiles', 'assets/pacman-tiles.png');
   this.load.spritesheet('pacman', 'assets/pacman.png', {frameWidth: 32, frameHeight: 32});
   this.load.tilemapTiledJSON('map', 'assets/pacman-map.json');
@@ -40,14 +40,14 @@ function create() {
   worldMap.setCollisionByExclusion([7,14]);
 
   // Create a physics group - useful for colliding the player against all the dots
-  /*
+  /* unless you want the map to get attacked by Hallenbeck dont uncomment this
   this.dotGroup = this.physics.add.staticGroup();
   worldMap.forEachTile( tile => {
-    if (tile.index === 7) {
+    if (tile.index === 14) {
       // A sprite has its origin at the center, so place the sprite at the center of the tile
       const x = tile.getCenterX();
       const y = tile.getCenterY();
-      const dot = this.dotGroup.create(x, y, "dot");
+      const dot = this.dotGroup.create(x, y, "Hallenbeck");
 
       worldMap.removeTileAt(tile.x, tile.y);
     }

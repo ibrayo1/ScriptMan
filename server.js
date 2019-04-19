@@ -6,8 +6,8 @@ var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 var players = {};
 var dot = {
-  x: Math.floor(Math.random() * 400) + 8,
-  y: Math.floor(Math.random() * 450) + 8
+  x: Math.floor(Math.random() * 400) + 16,
+  y: Math.floor(Math.random() * 450) + 16
 };
 
 app.use(express.static(__dirname + '/public'));
@@ -54,8 +54,8 @@ io.on('connection', function (socket) {
   socket.on('dotCollected', function () {
     //players[socket.id].score += 10;
     
-    dot.x = Math.floor(Math.random() * 400) + 8;
-    dot.y = Math.floor(Math.random() * 450) + 8;
+    dot.x = Math.floor(Math.random() * 400) + 16;
+    dot.y = Math.floor(Math.random() * 450) + 16;
     io.emit('dotLocation', dot);
     //io.emit('scoreUpdate', scores);
   });
