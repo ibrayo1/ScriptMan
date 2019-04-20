@@ -23,14 +23,16 @@ function preload() {
 
   // graphics (C)opyright Namco
   this.load.image('dot', 'assets/dot.png');
+  this.load.image('Hallenbeck', 'assets/Hallenbeck.png', {frameWidth: 32, frameHeight: 32});
   this.load.image('tiles', 'assets/pacman-tiles.png');
   this.load.spritesheet('pacman', 'assets/pacman.png', {frameWidth: 32, frameHeight: 32});
   this.load.tilemapTiledJSON('map', 'assets/pacman-map.json');
+  this.load.tilemapTiledJSON('map-with-dots', 'assets/pacman-map1.json');
 }
 
 function create() {
   // renders the map
-  const map = this.make.tilemap({key: 'map'});
+  const map = this.make.tilemap({key: 'map-with-dots'});
   const tileset = map.addTilesetImage("pacman-tiles", "tiles");
   const worldMap = map.createDynamicLayer("Pacman", tileset, 0, 0);
 
@@ -38,21 +40,26 @@ function create() {
   // 7 maps to dots and 14 maps to open spaces
   worldMap.setCollisionByExclusion([7,14]);
 
+  this.dotMap = []; //holds the positions of where the dots should appear on the map
+
   // Create a physics group - useful for colliding the player against all the dots
-  /*
-  this.dotGroup = this.physics.add.staticGroup();
+  //this.dotGroup = this.physics.add.staticGroup();
+
+  // this removes all the dots from the map
   worldMap.forEachTile( tile => {
     if (tile.index === 7) {
-      // A sprite has its origin at the center, so place the sprite at the center of the tile
+      // A sprite has its origin at the center, so get the origin of the tile
       const x = tile.getCenterX();
       const y = tile.getCenterY();
-      const dot = this.dotGroup.create(x, y, "dot");
 
+      // add the coordinates to the dotMap
+      this.dotMap.push({x, y});
+
+      // removes the tile at the current place
       worldMap.removeTileAt(tile.x, tile.y);
     }
   });
-  */
-
+  
   // create the pacman munch animation
   this.anims.create({
     key: 'munch',
@@ -102,9 +109,10 @@ function create() {
 
   this.socket.on('dotLocation', function (dotLocation) {
     if (self.dot) self.dot.destroy();
-    self.dot = self.physics.add.image(dotLocation.x, dotLocation.y, 'dot');
+    self.dot = self.physics.add.image(dotLocation.x, dotLocation.y, 'Hallenbeck');
+    var rand = self.dotMap[Math.floor(Math.random() * self.dotMap.length)];
     self.physics.add.overlap(self.pacman, self.dot, function () {
-      this.socket.emit('dotCollected');
+      this.socket.emit('dotCollected', {x: rand.x, y: rand.y});
     }, null, self);
   });
 
@@ -178,7 +186,7 @@ function addOtherPlayers(self, playerInfo, worldMap) {
   // check for wall collisions
   self.physics.add.collider(self.otherPlayer, worldMap);
 }
-
+/*
 // eat function
 function eatDot( pacman, dot ){
   dot.disableBody(true, true); //disables the bodies of the 
@@ -190,3 +198,4 @@ function eatDot( pacman, dot ){
     })
   }
 }
+*/
