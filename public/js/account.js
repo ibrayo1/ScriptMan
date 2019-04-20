@@ -6,16 +6,16 @@ class Account {
     //      1: the username the account chooses
     //      2: the ID number the account will be assigned
     // The team color will be chosen later.
-    constructor(id, x, y, rotation, team_color) {
+    constructor(id, x, y, rotation, val) {
         this.playerId = id;
-        this.team_color = team_color;
+        this.score = val;
         this.x = x;
         this.y = y;
         this.rotation = rotation;
     }
     // This function allows for the changing the user color
-    set_color(team_color) {
-        this.team_color = team_color;
-    }
+    //set_color(team_color) {
+    //    this.team_color = team_color;
+    //}
 }
 exports.Account = Account;

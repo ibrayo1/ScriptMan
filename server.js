@@ -24,12 +24,15 @@ io.on('connection', function (socket) {
     (14 * 16) + 8, // x
     (17 * 16) + 8, // y
     0, // rotation
-    0 // score
+    0 // score intialized to zero
   );
 
   // send the players object to the new player
   socket.emit('currentPlayers', players);
+  
+  // send the dot object to new player
   socket.emit('dotLocation', dot);
+
   // update all other players of the new player
   socket.broadcast.emit('newPlayer', players[socket.id]);
  
@@ -52,7 +55,9 @@ io.on('connection', function (socket) {
   });
 
   socket.on('dotCollected', function (dotLoc) {
-    //players[socket.id].score += 10;
+    players[socket.id].score += 10;
+
+    console.log(players[socket.id].score);
     
     dot.x = dotLoc.x;
     dot.y = dotLoc.y;
