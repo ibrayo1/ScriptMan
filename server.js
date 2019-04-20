@@ -6,8 +6,8 @@ var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 var players = {};
 var dot = {
-  x: Math.floor(Math.random() * 400) + 16,
-  y: Math.floor(Math.random() * 450) + 16
+  x: 30,
+  y: 30
 };
 
 app.use(express.static(__dirname + '/public'));
@@ -26,7 +26,7 @@ io.on('connection', function (socket) {
     0, // rotation
     0 // score
   );
-  
+
   // send the players object to the new player
   socket.emit('currentPlayers', players);
   socket.emit('dotLocation', dot);
@@ -51,11 +51,11 @@ io.on('connection', function (socket) {
     socket.broadcast.emit('playerMoved', players[socket.id]);
   });
 
-  socket.on('dotCollected', function () {
+  socket.on('dotCollected', function (dotLoc) {
     //players[socket.id].score += 10;
     
-    dot.x = Math.floor(Math.random() * 400) + 16;
-    dot.y = Math.floor(Math.random() * 450) + 16;
+    dot.x = dotLoc.x;
+    dot.y = dotLoc.y;
     io.emit('dotLocation', dot);
     //io.emit('scoreUpdate', scores);
   });
