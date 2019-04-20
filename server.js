@@ -57,7 +57,7 @@ io.on('connection', function (socket) {
   socket.on('dotCollected', function (dotLoc) {
     players[socket.id].score += 10;
 
-    console.log(players[socket.id].score);
+    console.log(players[socket.id].score); // for debugging purposes
     
     dot.x = dotLoc.x;
     dot.y = dotLoc.y;
