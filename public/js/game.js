@@ -120,6 +120,7 @@ function create() {
     }, null, self);
   });
 
+  // listens for the the scores for all the players and updates them
   this.socket.on('scoreUpdate', function (players) {
     Object.keys(players).forEach(function (id) {
       if (players[id].playerId === self.socket.id) {
