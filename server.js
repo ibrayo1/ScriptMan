@@ -35,6 +35,9 @@ io.on('connection', function (socket) {
 
   // update all other players of the new player
   socket.broadcast.emit('newPlayer', players[socket.id]);
+
+  // send the current scores of all the players
+  socket.emit('scoreUpdate', players);
  
   // when a player disconnects, remove them from our players object
   socket.on('disconnect', function () {
@@ -62,7 +65,8 @@ io.on('connection', function (socket) {
     dot.x = dotLoc.x;
     dot.y = dotLoc.y;
     io.emit('dotLocation', dot);
-    //io.emit('scoreUpdate', scores);
+    // emit a message to all player that updated his score
+    io.emit('scoreUpdate', players);
   });
 
 });

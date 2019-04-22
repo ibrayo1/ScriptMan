@@ -1,7 +1,7 @@
 var config = {
     type: Phaser.AUTO,
     parent: 'phaser-example',
-    width: 448,
+    width: 800,
     height: 496,
     physics: {
       default: 'arcade',
@@ -41,6 +41,8 @@ function create() {
   worldMap.setCollisionByExclusion([7,14]);
 
   this.dotMap = []; //holds the positions of where the dots should appear on the map
+
+  this.scoreMap = new Map(); //creates and holds the scores for all players in the world
 
   // Create a physics group - useful for colliding the player against all the dots
   //this.dotGroup = this.physics.add.staticGroup();
@@ -83,7 +85,7 @@ function create() {
     });
   });
 
-  // checks for new players added onto server
+  // checks for if a new players added onto server
   this.socket.on('newPlayer', function (playerInfo) {
     addOtherPlayers(self, playerInfo, worldMap);
   });
@@ -92,7 +94,9 @@ function create() {
   this.socket.on('disconnect', function (playerId) {
     self.otherPlayers.getChildren().forEach(function (otherPlayer) {
       if (playerId === otherPlayer.playerId) {
-        otherPlayer.destroy();
+        self.scoreMap.get(otherPlayer.playerId).destroy(); // destroy text
+        self.scoreMap.delete(otherPlayer.playerId); // delete player's score from the map of player scores
+        otherPlayer.destroy(); // destroy the player object
       }
     });
   });
@@ -114,6 +118,18 @@ function create() {
     self.physics.add.overlap(self.pacman, self.dot, function () {
       this.socket.emit('dotCollected', {x: rand.x, y: rand.y});
     }, null, self);
+  });
+
+  this.socket.on('scoreUpdate', function (players) {
+    Object.keys(players).forEach(function (id) {
+      if (players[id].playerId === self.socket.id) {
+        var playerScore = self.scoreMap.get(self.socket.id);
+        playerScore.setText('Your Score: ' + players[id].score);
+      } else {
+        var otherPlayerScore = self.scoreMap.get(players[id].playerId);
+        otherPlayerScore.setText(players[id].playerId + ': ' + players[id].score);
+      }
+    });
   });
 
   // define cursors as standard arrow keys
@@ -168,6 +184,11 @@ function addPlayer(self, playerInfo, worldMap) {
   // play the animation
   self.pacman.play('munch');
 
+  // add the score for that player onto the score board
+  self.scoreMap.set(self.socket.id, self.add.text(480, 16, '', { fontSize: '16px', fill: '#FFFFFF' }));
+  var scoreText = self.scoreMap.get(self.socket.id);
+  scoreText.setText('Your Score: ' + playerInfo.score);
+
   // check for wall collisions
   self.physics.add.collider(self.pacman, worldMap);
 }
@@ -182,6 +203,11 @@ function addOtherPlayers(self, playerInfo, worldMap) {
 
   self.otherPlayer.playerId = playerInfo.playerId;
   self.otherPlayers.add(self.otherPlayer);
+  
+  // add the score for that player onto the score board
+  self.scoreMap.set(self.otherPlayer.playerId, self.add.text(480, 16*(self.otherPlayers.getLength()+1), '', { fontSize: '16px', fill: '#FFFFFF' }));
+  var scoreText = self.scoreMap.get(self.otherPlayer.playerId);
+  scoreText.setText(playerInfo.playerId + ': ' + playerInfo.score);
 
   // check for wall collisions
   self.physics.add.collider(self.otherPlayer, worldMap);
