@@ -1,0 +1,86 @@
+.PlayerBox {
+    border:double 2px #000000;
+    -moz-border-radius: 75px;
+    -webkit-border-radius: 75px;
+    border-radius: 75px;
+    padding: 1%;
+    margin: 1%;
+    margin-right: 50%;
+}
+
+.colorPicker{
+    /*background-color: #DDE0E3; /* light grey */
+    
+}
+body {
+    background-color: powderblue;
+}
+#blueBox {
+    background: #13b4ff;
+    color: blue;
+    display: inline-block; /* make them next to each other */
+    padding: 3%;
+
+    margin-right: auto;
+    border: 1px solid rgba(0, 0, 0, .2);
+}
+#purpleBox{
+    background: #EE82EE;
+    color: blue;
+    display: inline-block; /* make them next to each other */
+    padding: 3%;
+
+    margin-right: auto;
+    border: 1px solid rgba(0, 0, 0, .2);
+}
+#greenBox{
+    background: #32CD32;
+    color: blue;
+    display: inline-block; /* make them next to each other */
+    padding: 3%;
+ 
+    margin-right: auto;
+    border: 1px solid rgba(0, 0, 0, .2);
+}
+#yellowBox{
+    background: #FFFF00;
+    color: blue;
+    display: inline-block; /* make them next to each other */
+    padding: 3%;
+ 
+    margin-right: auto;
+    border: 1px solid rgba(0, 0, 0, .2);
+}
+#yellowBox:hover {
+    filter: grayscale(70%);
+}
+
+#blueBox:hover {
+    filter: grayscale(70%);
+}
+
+#greenBox:hover {
+    filter: grayscale(70%);
+}
+
+#purpleBox:hover {
+    filter: grayscale(70%);
+}
+
+#purpleBox>.selected{
+    filter: grayscale(70%);
+}
+
+#yellowBox>.selected{
+    filter: grayscale(70%);
+}
+#blueBox>.selected{
+    filter: grayscale(70%);
+}
+#greenBox>.selected{
+    filter: grayscale(70%);
+}
+
+#usernameBox{
+    border-color: grey;
+}

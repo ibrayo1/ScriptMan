@@ -27,7 +27,7 @@ io.on('connection', function (socket) {
     0, // rotation
     0 // score intialized to zero
   );
-
+ 
   // send the players object to the new player
   socket.emit('currentPlayers', players);
   

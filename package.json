@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha -r ts-node/register test/**/*.spec.ts",
     "start": "node server.js",
-    "lobby": "node public/js/lobby.js",
+    "lobby": "cd public/js | browserify -x uws public/js/lobby_client.js > public/js/client.js | cd .. | cd .. | node public/js/lobby_server.js",
     "watch": "tsc *.ts --watch"
   },
   "keywords": [],
@@ -14,14 +14,15 @@
   "license": "ISC",
   "dependencies": {
     "@types/mocha": "^5.2.6",
+    "browserify": "^16.2.3",
     "chai": "^4.2.0",
     "express": "^4.16.4",
     "mocha": "^6.1.4",
     "socket.io": "^2.2.0",
     "ts-node": "^8.1.0",
-    "typescript": "^3.4.4"
+    "typescript": "^3.4.5"
   },
   "devDependencies": {
-    "@types/node": "^11.13.6"
+    "@types/node": "^11.13.7"
   }
 }

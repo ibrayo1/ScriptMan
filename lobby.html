@@ -2,15 +2,21 @@
 <html>
     <head>
         <title>Lobby</title>
+        <link rel="stylesheet" type="text/css" href="/public/lobby.css">
         <meta charset="utf-8">
-        <link rel="stylesheet" type="text/css" href="styles/lobby.css">
     </head>
-    <script src="/socket.io/socket.io.js"></script>
+    
     <body>
+        <script>
+            var exports = {};    
+            
+        </script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="public/js/client.js"></script>
         <script src="//cdn.jsdelivr.net/npm/phaser@3.16.2/dist/phaser.min.js"></script>
         
         <div id="playerOne" class="PlayerBox">
-             
+            
         </div>
         <div id="playerTwo" class="PlayerBox">
 
@@ -28,7 +34,7 @@
         </div>
         <div class="colorPicker">
             <div id="blueBox" class="colorChoice unselected" onclick="chooseBlue()">
-
+                
             </div>
             <div id="purpleBox" class="colorChoice unselected" onclick="choosePurple()">
 
@@ -43,6 +49,92 @@
         <button id="readyButton" disabled>
             Ready!
         </button>
-        <script src="js/lobby.js"></script>
+        
     </body>
+    <style>
+    .PlayerBox {
+        border:double 2px #000000;
+        -moz-border-radius: 75px;
+        -webkit-border-radius: 75px;
+        border-radius: 75px;
+        padding: 1%;
+        margin: 1%;
+        margin-right: 50%;
+    }
+
+    .colorPicker{
+        /*background-color: #DDE0E3; /* light grey */
+
+    }
+    
+    #blueBox {
+        background: #13b4ff;
+        color: blue;
+        display: inline-block; /* make them next to each other */
+        padding: 3%;
+
+        margin-right: auto;
+        border: 1px solid rgba(0, 0, 0, .2);
+    }
+    #purpleBox{
+        background: #EE82EE;
+        color: blue;
+        display: inline-block; /* make them next to each other */
+        padding: 3%;
+
+        margin-right: auto;
+        border: 1px solid rgba(0, 0, 0, .2);
+    }
+    #greenBox{
+        background: #32CD32;
+        color: blue;
+        display: inline-block; /* make them next to each other */
+        padding: 3%;
+    
+        margin-right: auto;
+        border: 1px solid rgba(0, 0, 0, .2);
+    }
+    #yellowBox{
+        background: #FFFF00;
+        color: blue;
+        display: inline-block; /* make them next to each other */
+        padding: 3%;
+    
+        margin-right: auto;
+        border: 1px solid rgba(0, 0, 0, .2);
+    }
+    #yellowBox:hover {
+        filter: grayscale(70%);
+    }
+
+    #blueBox:hover {
+        filter: grayscale(70%);
+    }
+
+    #greenBox:hover {
+        filter: grayscale(70%);
+    }
+
+    #purpleBox:hover {
+        filter: grayscale(70%);
+    }
+
+    #purpleBox>.selected{
+        filter: grayscale(70%);
+    }
+
+    #yellowBox>.selected{
+        filter: grayscale(70%);
+    }
+    #blueBox>.selected{
+        filter: grayscale(70%);
+    }
+    #greenBox>.selected{
+        filter: grayscale(70%);
+    }
+
+    #usernameBox{
+        border-color: grey;
+    }
+    </style>
 </html>
