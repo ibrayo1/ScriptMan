@@ -8,7 +8,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <body>
         <script src="//cdn.jsdelivr.net/npm/phaser@3.16.2/dist/phaser.min.js"></script>
-        <script src="js/lobby.js"></script>
+        
         <div id="playerOne" class="PlayerBox">
              
         </div>
@@ -22,7 +22,9 @@
 
         </div>
         <div id="userNameField">
-
+            Username:</br>
+            <input type="text" name="username" id="usernameBox" onchange="usernameChanged(this.value)"> <br>  
+            <br>      
         </div>
         <div class="colorPicker">
             <div id="blueBox" class="colorChoice unselected" onclick="chooseBlue()">
@@ -38,9 +40,9 @@
 
             </div>
         </div>
-        <div id="readyButton">
-
-        </div>
-        
+        <button id="readyButton" disabled>
+            Ready!
+        </button>
+        <script src="js/lobby.js"></script>
     </body>
 </html>

@@ -78,3 +78,7 @@
 #greenBox>.selected{
     filter: grayscale(70%);
 }
+
+#usernameBox{
+    border-color: grey;
+}

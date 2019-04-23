@@ -6,6 +6,7 @@
   "scripts": {
     "test": "mocha -r ts-node/register test/**/*.spec.ts",
     "start": "node server.js",
+    "lobby": "node public/js/lobby.js",
     "watch": "tsc *.ts --watch"
   },
   "keywords": [],
