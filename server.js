@@ -15,6 +15,7 @@ app.get('/', function (req, res) {
 io.on('connection', function (socket) {
   console.log('a user connected');
   // create a new player and add it to our players object
+  console.log('their socket.id: ' + socket.id)
   players[socket.id] = new Account(
     socket.id, // ID
     (14 * 16) + 8, // x
