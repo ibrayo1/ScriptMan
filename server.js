@@ -5,6 +5,10 @@ var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 var players = {};
+var dot = {
+  x: 30,
+  y: 30
+};
 
 app.use(express.static(__dirname + '/public'));
  
@@ -21,12 +25,20 @@ io.on('connection', function (socket) {
     (14 * 16) + 8, // x
     (17 * 16) + 8, // y
     0, // rotation
+    0 // score intialized to zero
   );
-  
+
   // send the players object to the new player
   socket.emit('currentPlayers', players);
+  
+  // send the dot object to new player
+  socket.emit('dotLocation', dot);
+
   // update all other players of the new player
   socket.broadcast.emit('newPlayer', players[socket.id]);
+
+  // send the current scores of all the players
+  socket.emit('scoreUpdate', players);
  
   // when a player disconnects, remove them from our players object
   socket.on('disconnect', function () {
@@ -46,10 +58,18 @@ io.on('connection', function (socket) {
     socket.broadcast.emit('playerMoved', players[socket.id]);
   });
 
-  socket.on('playerEatDot', function (gameData){
-    players[socket.id].world = gameData.world;
-    socket.broadcast.emit('playerAteDot', players[socket.id]);
+  socket.on('dotCollected', function (dotLoc) {
+    players[socket.id].score += 10;
+
+    console.log(players[socket.id].score); // for debugging purposes
+    
+    dot.x = dotLoc.x;
+    dot.y = dotLoc.y;
+    io.emit('dotLocation', dot);
+    // emit a message to all player that updated his score
+    io.emit('scoreUpdate', players);
   });
+
 });
 
 server.listen(3000, function () {
