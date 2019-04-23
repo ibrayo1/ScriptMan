@@ -44,9 +44,6 @@ function create() {
 
   this.scoreMap = new Map(); //creates and holds the scores for all players in the world
 
-  // Create a physics group - useful for colliding the player against all the dots
-  //this.dotGroup = this.physics.add.staticGroup();
-
   // this removes all the dots from the map
   worldMap.forEachTile( tile => {
     if (tile.index === 7) {
@@ -172,8 +169,6 @@ function update(time, delta) {
       y: this.pacman.y
     };
 
-    // checks to see if pacman overlaps with dots if so then eats them
-    // this.physics.add.overlap(this.pacman, this.dotGroup, eatDot, null, this);
   }
 }
 
