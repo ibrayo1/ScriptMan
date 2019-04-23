@@ -3,37 +3,38 @@
     <head>
         <title>Lobby</title>
         <meta charset="utf-8">
+        <link rel="stylesheet" type="text/css" href="styles/lobby.css">
     </head>
     <script src="/socket.io/socket.io.js"></script>
     <body>
         <script src="//cdn.jsdelivr.net/npm/phaser@3.16.2/dist/phaser.min.js"></script>
         <script src="js/lobby.js"></script>
-        <div id="playerOne">
+        <div id="playerOne" class="PlayerBox">
+             
+        </div>
+        <div id="playerTwo" class="PlayerBox">
 
         </div>
-        <div id="playerTwo">
+        <div id="playerThree" class="PlayerBox">
 
         </div>
-        <div id="playerThree">
-
-        </div>
-        <div id="playerFour">
+        <div id="playerFour" class="PlayerBox">
 
         </div>
         <div id="userNameField">
 
         </div>
-        <div id="colorPicker">
-            <div id="blueBox" class="colorChoice" onclick="chooseBlue()">
+        <div class="colorPicker">
+            <div id="blueBox" class="colorChoice unselected" onclick="chooseBlue()">
 
             </div>
-            <div id="purpleBox" class="colorChoice" onclick="choosePurple()">
+            <div id="purpleBox" class="colorChoice unselected" onclick="choosePurple()">
 
             </div>
-            <div id="yellowBox" class="colorChoice" onclick="chooseYellow()">
+            <div id="yellowBox" class="colorChoice unselected" onclick="chooseYellow()">
 
             </div>
-            <div id="greenBox" class="colorChoice" onclick="chooseGreen()">
+            <div id="greenBox" class="colorChoice unselected" onclick="chooseGreen()">
 
             </div>
         </div>

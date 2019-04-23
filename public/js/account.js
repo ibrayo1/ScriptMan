@@ -13,9 +13,5 @@ class Account {
         this.y = y;
         this.rotation = rotation;
     }
-    // This function allows for the changing the user color
-    //set_color(team_color) {
-    //    this.team_color = team_color;
-    //}
 }
 exports.Account = Account;

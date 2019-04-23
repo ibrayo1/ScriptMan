@@ -35,5 +35,17 @@ io.on('connection', function (socket) {
 });
 let blueBox = document.getElementById("blueBox");
 blueBox.onclick(this.chooseBlue());
+let yellowBox = document.getElementById("yellowBox");
+yellowBox.onclick(this.chooseYellow());
+let greenBox = document.getElementById("greenBox");
+greenBox.onclick(this.chooseGreen());
+let purpleBox = document.getElementById("purpleBox");
+purpleBox.onclick(this.choosePurple());
 function chooseBlue() {
+}
+function choosePurple() {
+}
+function chooseGreen() {
+}
+function chooseYellow() {
 }
