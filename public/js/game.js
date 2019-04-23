@@ -213,16 +213,3 @@ function addOtherPlayers(self, playerInfo, worldMap) {
   // check for wall collisions
   self.physics.add.collider(self.otherPlayer, worldMap);
 }
-/*
-// eat function
-function eatDot( pacman, dot ){
-  dot.disableBody(true, true); //disables the bodies of the 
-
-  // enables all of the starts back onto the map
-  if (this.dotGroup.countActive(true) === 0){
-    this.dotGroup.children.iterate(function (child) {
-      child.enableBody(true, child.x, child.y, true, true);
-    })
-  }
-}
-*/
