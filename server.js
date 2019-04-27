@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 var express = require('express');
 // This imports the account class from the Account.js file
 const { Account } = require(__dirname + '/public/js/account.js');

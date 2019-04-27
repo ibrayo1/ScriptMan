@@ -2,19 +2,17 @@
 <html>
     <head>
         <title>Lobby</title>
-        <link rel="stylesheet" type="text/css" href="/public/lobby.css">
+        
         <meta charset="utf-8">
     </head>
-    
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.16.2/dist/phaser.min.js"></script>
     <body>
-        <script>
-            var exports = {};    
-            
-        </script>
-        <script src="/socket.io/socket.io.js"></script>
-        <script src="public/js/client.js"></script>
-        <script src="//cdn.jsdelivr.net/npm/phaser@3.16.2/dist/phaser.min.js"></script>
         
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="js/index.js"></script>
+        
+        <script > 
+        /**
         <div id="playerOne" class="PlayerBox">
             
         </div>
@@ -49,7 +47,8 @@
         <button id="readyButton" disabled>
             Ready!
         </button>
-        
+        **/
+       </script>
     </body>
     <style>
     .PlayerBox {
@@ -137,4 +136,5 @@
         border-color: grey;
     }
     </style>
+    
 </html>

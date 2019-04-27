@@ -66447,7 +66447,7 @@ var PlayerNumber;
     PlayerNumber[PlayerNumber["PlayerFour"] = 3] = "PlayerFour";
 })(PlayerNumber || (PlayerNumber = {}));
 var public_path = path.resolve('.');
-app.use(express.static(public_path + '/public'));
+app.use(express.static(public_path + '/public/'));
 app.get('/', (req, res) => {
     var lobbyPath = path.resolve(__dirname + '../public');
     res.sendFile('lobby.html', { root: '.' });
