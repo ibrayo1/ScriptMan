@@ -259,11 +259,12 @@ var GameScene = {
       // checks for players that disconnect
       this.socket.on('disconnect', function (playerId) {
           self.otherPlayers.getChildren().forEach(function (otherPlayer) {
-          if (playerId === otherPlayer.playerId) {
-              self.scoreMap.get(otherPlayer.playerId).destroy(); // destroy text
-              self.scoreMap.delete(otherPlayer.playerId); // delete player's score from the map of player scores
-              otherPlayer.destroy(); // destroy the player object
-          }
+            if (playerId === otherPlayer.playerId) {
+                self.scoreMap.get(otherPlayer.playerId).destroy(); // destroy text
+                self.scoreMap.delete(otherPlayer.playerId); // delete player's score from the map of player scores
+                otherPlayer.destroy(); // destroy the player object
+                this.scene.launch('TitleScene');
+            }
           });
       });
 
