@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 var express = require('express');
 // This imports the account class from the Account.js file
 const { Account } = require(__dirname + '/public/js/account.js');
@@ -19,14 +20,16 @@ app.get('/', function (req, res) {
 io.on('connection', function (socket) {
   console.log('a user connected');
   // create a new player and add it to our players object
+  console.log('their socket.id: ' + socket.id)
   players[socket.id] = new Account(
     socket.id, // ID
     (14 * 16) + 8, // x
     (17 * 16) + 8, // y
     0, // rotation
-    0 // score intialized to zero
+    0, // score intialized to zero
+    "", // username is intialized to zero
   );
-
+ 
   // send the players object to the new player
   socket.emit('currentPlayers', players);
   

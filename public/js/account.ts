@@ -12,12 +12,13 @@ export class Account {
     //      2: the ID number the account will be assigned
     // The team color will be chosen later.
     constructor(id: number, x: number, y: number, 
-        rotation: number, val: number ){
+        rotation: number, val: number, name: string ){
         this.playerId = id
         this.score = val
         this.x = x
         this.y = y
         this.rotation = rotation
+        this.username = name
     }
 
     // This function allows for the changing the user color

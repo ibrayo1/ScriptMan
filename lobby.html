@@ -2,11 +2,139 @@
 <html>
     <head>
         <title>Lobby</title>
+        
         <meta charset="utf-8">
     </head>
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.16.2/dist/phaser.min.js"></script>
     <body>
-        <script src="//cdn.jsdelivr.net/npm/phaser@3.16.2/dist/phaser.min.js"></script>
-        <script src="js/lobby.js"></script>
+        
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="js/index.js"></script>
+        
+        <script > 
+        /**
+        <div id="playerOne" class="PlayerBox">
+            
+        </div>
+        <div id="playerTwo" class="PlayerBox">
+
+        </div>
+        <div id="playerThree" class="PlayerBox">
+
+        </div>
+        <div id="playerFour" class="PlayerBox">
+
+        </div>
+        <div id="userNameField">
+            Username:</br>
+            <input type="text" name="username" id="usernameBox" onchange="usernameChanged(this.value)"> <br>  
+            <br>      
+        </div>
+        <div class="colorPicker">
+            <div id="blueBox" class="colorChoice unselected" onclick="chooseBlue()">
+                
+            </div>
+            <div id="purpleBox" class="colorChoice unselected" onclick="choosePurple()">
+
+            </div>
+            <div id="yellowBox" class="colorChoice unselected" onclick="chooseYellow()">
+
+            </div>
+            <div id="greenBox" class="colorChoice unselected" onclick="chooseGreen()">
+
+            </div>
+        </div>
+        <button id="readyButton" disabled>
+            Ready!
+        </button>
+        **/
+       </script>
     </body>
+    <style>
+    .PlayerBox {
+        border:double 2px #000000;
+        -moz-border-radius: 75px;
+        -webkit-border-radius: 75px;
+        border-radius: 75px;
+        padding: 1%;
+        margin: 1%;
+        margin-right: 50%;
+    }
+
+    .colorPicker{
+        /*background-color: #DDE0E3; /* light grey */
+
+    }
+    
+    #blueBox {
+        background: #13b4ff;
+        color: blue;
+        display: inline-block; /* make them next to each other */
+        padding: 3%;
+
+        margin-right: auto;
+        border: 1px solid rgba(0, 0, 0, .2);
+    }
+    #purpleBox{
+        background: #EE82EE;
+        color: blue;
+        display: inline-block; /* make them next to each other */
+        padding: 3%;
+
+        margin-right: auto;
+        border: 1px solid rgba(0, 0, 0, .2);
+    }
+    #greenBox{
+        background: #32CD32;
+        color: blue;
+        display: inline-block; /* make them next to each other */
+        padding: 3%;
+    
+        margin-right: auto;
+        border: 1px solid rgba(0, 0, 0, .2);
+    }
+    #yellowBox{
+        background: #FFFF00;
+        color: blue;
+        display: inline-block; /* make them next to each other */
+        padding: 3%;
+    
+        margin-right: auto;
+        border: 1px solid rgba(0, 0, 0, .2);
+    }
+    #yellowBox:hover {
+        filter: grayscale(70%);
+    }
+
+    #blueBox:hover {
+        filter: grayscale(70%);
+    }
+
+    #greenBox:hover {
+        filter: grayscale(70%);
+    }
+
+    #purpleBox:hover {
+        filter: grayscale(70%);
+    }
+
+    #purpleBox>.selected{
+        filter: grayscale(70%);
+    }
+
+    #yellowBox>.selected{
+        filter: grayscale(70%);
+    }
+    #blueBox>.selected{
+        filter: grayscale(70%);
+    }
+    #greenBox>.selected{
+        filter: grayscale(70%);
+    }
+
+    #usernameBox{
+        border-color: grey;
+    }
+    </style>
+    
 </html>
