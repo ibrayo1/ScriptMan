@@ -33,9 +33,7 @@ io.on('connection', function (socket) {
   // sets the name of the player
   socket.on('playerName', function(nameData){
     players[socket.id].username = nameData.username;
-
     console.log('their name is: ' + players[socket.id].username);
-    
     io.emit('scoreUpdate', players);
   });
 
