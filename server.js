@@ -11,6 +11,21 @@ var dot = {
   y: 30
 };
 
+//We need to synchronize the dot map between servers and clients
+//To do this, We're gonna find all indexes in the map with and id of 7
+//And store their index in an array. This corresponds to the dotmap on the client
+var map = require('./public/assets/pacman_map_massive_2.json');
+//Get the first layer of the map
+map = map.layers[0].data;
+
+//For every 7, or "dot"
+var dotArray = [];
+for(var i = 0; i < map.length; i++){
+  if(map[i] == 7){
+    dotArray.push(1);
+  }
+}
+
 app.use(express.static(__dirname + '/public'));
  
 app.get('/', function (req, res) {
@@ -41,7 +56,10 @@ io.on('connection', function (socket) {
   socket.emit('currentPlayers', players);
 
   // send the dot object to new player
-  socket.emit('dotLocation', dot);
+  //socket.emit('dotLocation', dot);
+
+  // send the entire dotmap
+  socket.emit('dotMap', dotArray);
 
   // update all other players of the new player
   socket.broadcast.emit('newPlayer', players[socket.id]);
@@ -67,6 +85,9 @@ io.on('connection', function (socket) {
     socket.broadcast.emit('playerMoved', players[socket.id]);
   });
 
+  socket.on('destroyDot' , function(dotIndex){
+      console.log(dotIndex);
+  });
   socket.on('dotCollected', function (dotLoc) {
     players[socket.id].score += 10;
 

@@ -148,19 +148,28 @@ var GameScene = {
   preload: function preload(){
       // graphics (C)opyright Namco
       this.load.image('dot', 'assets/dot.png');
-      this.load.image('Hallenbeck', 'assets/Hallenbeck.png', {frameWidth: 32, frameHeight: 32});
+      this.load.image('Hallenbeck', 'assets/Hallenbeck_tiny.png', {frameWidth: 8, frameHeight: 8});
       this.load.image('tiles', 'assets/pacman-tiles.png');
       this.load.spritesheet('pacman', 'assets/pacman.png', {frameWidth: 32, frameHeight: 32});
       this.load.tilemapTiledJSON('map', 'assets/pacman-map.json');
       this.load.tilemapTiledJSON('map-with-dots', 'assets/pacman-map1.json');
+      //The massive fuckin map
+      this.load.tilemapTiledJSON('massive-map', 'assets/pacman_map_massive_2.json');
+
   },
 
   create: function create(){
+
+      //Add a group to hold all our dots
+      this.dots = this.physics.add.group({
+        key: 'dots'
+      });
+
       // destroys the TitleScene
       this.scene.remove('TitleScene');
 
       // renders the map
-      const map = this.make.tilemap({key: 'map-with-dots'});
+      const map = this.make.tilemap({key: 'massive-map'});
       const tileset = map.addTilesetImage("pacman-tiles", "tiles");
       const worldMap = map.createDynamicLayer("Pacman", tileset, 0, 0);
 
@@ -294,6 +303,14 @@ var GameScene = {
             this.socket.emit('dotCollected', {x: rand.x, y: rand.y});
           }, null, self);
       });
+
+      this.socket.on('dotMap', function (dotArray) {
+        for(var i = 0; i < dotArray.length; i++){
+            var dot = self.physics.add.image(self.dotMap[i].x, self.dotMap[i].y, 'dot');
+            dot.mapIndex = i;
+            self.dots.add(dot);
+        }
+      });
       
       // listens for the the scores for all the players and updates them
       this.socket.on('scoreUpdate', function (players) {
@@ -314,6 +331,14 @@ var GameScene = {
 
   update: function update(){
     if(this.pacman){
+
+        this.physics.add.overlap(this.pacman, this.dots, collectDot, null, this);
+
+        //We want our camera to follow pacman
+        this.cameras.main.startFollow(this.pacman)
+
+        this.pacman.body.setCollideWorldBounds(false);
+
         // Horizontal movement
         if (cursors.left.isDown) {
           this.pacman.body.setVelocityX(-150);
@@ -351,10 +376,15 @@ var GameScene = {
 
 }
 
+function collectDot(player, star){
+  this.socket.emit('destroyDot', star.mapIndex)
+  star.destroy();
+}
+
 var game = new Phaser.Game({
   type: Phaser.AUTO,
   parent: 'phaser-example',
-  width: 800,
+  width: 600,
   height: 496,
   physics: {
     default: 'arcade',
@@ -363,5 +393,5 @@ var game = new Phaser.Game({
       gravity: { y: 0 }
     }
   },
-  scene: [TitleScene, GameScene]
+  scene: [TitleScene, GameScene],
 });
