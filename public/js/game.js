@@ -15,22 +15,22 @@ var TitleScene = {
       ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'], 
       ['K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'], 
       ['U', 'V', 'W', 'X', 'Y', 'Z', '.', '-', '<', '>']
-    ]
+    ];
     
-    var select = {x: 0, y: 0}
-    var name = ''
+    var cursor = {x: 0, y: 0};
+    var name = '';
 
-    var input = this.add.bitmapText(80, 50, 'arcade', 'ABCDEFGHIJ\n\nKLMNOPQRST\n\nUVWXYZ.-').setLetterSpacing(20)
+    var input = this.add.bitmapText(80, 50, 'arcade', 'ABCDEFGHIJ\n\nKLMNOPQRST\n\nUVWXYZ.-').setLetterSpacing(20);
     input.setInteractive();
 
-    var rub = this.add.image(input.x + 430, input.y + 148, 'rub')
-    var end = this.add.image(input.x + 482, input.y + 148, 'end')
+    var rub = this.add.image(input.x + 430, input.y + 148, 'rub');
+    var end = this.add.image(input.x + 482, input.y + 148, 'end');
 
-    var block = this.add.image(input.x - 10, input.y -2, 'block').setOrigin(0)
+    var block = this.add.image(input.x - 10, input.y -2, 'block').setOrigin(0);
 
-    var legend = this.add.bitmapText(260, 260, 'arcade', 'NAME').setTint(0xff00ff)
+    var legend = this.add.bitmapText(260, 260, 'arcade', 'NAME').setTint(0xff00ff);
 
-    var playerText = this.add.bitmapText(260, 310, 'arcade', name).setTint(0xff0000)
+    var playerText = this.add.bitmapText(260, 310, 'arcade', name).setTint(0xff0000);
 
     this.input.keyboard.on('keyup', function (event) {
         if (event.keyCode === 37)
@@ -95,15 +95,15 @@ var TitleScene = {
         }
     })
     input.on('pointermove', function(pointer, x, y) {
-        var cx = Phaser.Math.Snap.Floor(x, 52, 0, true)
-        var cy = Phaser.Math.Snap.Floor(y, 64, 0, true)
-        var char = chars[cy][cx]
+        var cx = Phaser.Math.Snap.Floor(x, 52, 0, true);
+        var cy = Phaser.Math.Snap.Floor(y, 64, 0, true);
+        var char = chars[cy][cx];
 
         pointer.x = cx;
-        pointer.y = cy
+        pointer.y = cy;
 
-        block.x = input.x - 10 + (cx * 52)
-        block.y = input.y - 2 + (cy * 64)
+        block.x = input.x - 10 + (cx * 52);
+        block.y = input.y - 2 + (cy * 64);
     }, this)
 
     input.on('pointerup', function(pointer, x, y) {
@@ -289,12 +289,11 @@ var GameScene = {
       this.socket.on('dotLocation', function (dotLocation) {
           if (self.dot) self.dot.destroy();
           self.dot = self.physics.add.image(dotLocation.x, dotLocation.y, 'Hallenbeck');
-          self.dot.setCircle(8, 3, 5);
           var rand = self.dotMap[Math.floor(Math.random() * self.dotMap.length)];
           self.physics.add.overlap(self.pacman, self.dot, function () {
             this.socket.emit('dotCollected', {x: rand.x, y: rand.y});
           }, null, self);
-        });
+      });
       
       // listens for the the scores for all the players and updates them
       this.socket.on('scoreUpdate', function (players) {
