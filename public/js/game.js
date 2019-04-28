@@ -206,7 +206,7 @@ var GameScene = {
           if (players[id].playerId === self.socket.id) {
               var rand = self.dotMap[Math.floor(Math.random() * self.dotMap.length)];
               self.pacman = self.physics.add.sprite(rand.x, rand.y, 'pacman');
-              self.pacman.setSize(16, 16);
+              self.pacman.setCircle(8, 8, 8);
               self.pacman.setCollideWorldBounds(true);
 
               // play the animation
@@ -222,7 +222,7 @@ var GameScene = {
           } else {
               var rand = self.dotMap[Math.floor(Math.random() * self.dotMap.length)];
               self.otherPlayer = self.physics.add.sprite(rand.x, rand.y, 'pacman');
-              self.otherPlayer.setSize(16, 16);
+              self.otherPlayer.setCircle(8, 8, 8);
               self.otherPlayer.setCollideWorldBounds(true);
               
               // play the animation
@@ -246,7 +246,7 @@ var GameScene = {
       this.socket.on('newPlayer', function (playerInfo) {
         var rand = self.dotMap[Math.floor(Math.random() * self.dotMap.length)];
         self.otherPlayer = self.physics.add.sprite(rand.x, rand.y, 'pacman');
-        self.otherPlayer.setSize(16, 16);
+        self.otherPlayer.setCircle(8, 8, 8);
         self.otherPlayer.setCollideWorldBounds(true);
         
         // play the animation
@@ -289,6 +289,7 @@ var GameScene = {
       this.socket.on('dotLocation', function (dotLocation) {
           if (self.dot) self.dot.destroy();
           self.dot = self.physics.add.image(dotLocation.x, dotLocation.y, 'Hallenbeck');
+          self.dot.setCircle(8, 3, 5);
           var rand = self.dotMap[Math.floor(Math.random() * self.dotMap.length)];
           self.physics.add.overlap(self.pacman, self.dot, function () {
             this.socket.emit('dotCollected', {x: rand.x, y: rand.y});
