@@ -27,12 +27,21 @@ io.on('connection', function (socket) {
     (17 * 16) + 8, // y
     0, // rotation
     0, // score intialized to zero
-    "", // username is intialized to zero
+    '', // username is intialized to empty string
   );
  
+  // sets the name of the player
+  socket.on('playerName', function(nameData){
+    players[socket.id].username = nameData.username;
+
+    console.log('their name is: ' + players[socket.id].username);
+    
+    io.emit('scoreUpdate', players);
+  });
+
   // send the players object to the new player
   socket.emit('currentPlayers', players);
-  
+
   // send the dot object to new player
   socket.emit('dotLocation', dot);
 
@@ -41,7 +50,7 @@ io.on('connection', function (socket) {
 
   // send the current scores of all the players
   socket.emit('scoreUpdate', players);
- 
+
   // when a player disconnects, remove them from our players object
   socket.on('disconnect', function () {
     console.log('user disconnected');

@@ -1,3 +1,5 @@
+var usrname = '';
+
 var TitleScene = {
   key: 'TitleScene',
 
@@ -73,6 +75,7 @@ var TitleScene = {
             if (cursor.x === 9 && cursor.y === 2 && name.length > 0)
             {
                 //  Submit
+                usrname = name;
                 this.scene.launch('GameScene');
             }
             else if (cursor.x === 8 && cursor.y === 2 && name.length > 0)
@@ -124,6 +127,7 @@ var TitleScene = {
         else if (char === '>' && name.length > 0)
         {
             //  Submit
+            usrname = name;
             this.scene.launch('GameScene');
         }
         else if (name.length < 3)
@@ -193,28 +197,31 @@ var GameScene = {
 
       var self = this;
       this.socket = io();
+      this.socket.emit('playerName', {username: usrname});
       this.otherPlayers = this.physics.add.group();
       
       // listen for current players
       this.socket.on('currentPlayers', function (players) {
           Object.keys(players).forEach(function (id) {
           if (players[id].playerId === self.socket.id) {
-              self.pacman = self.physics.add.sprite(players[id].x, players[id].y, 'pacman');
+              var rand = self.dotMap[Math.floor(Math.random() * self.dotMap.length)];
+              self.pacman = self.physics.add.sprite(rand.x, rand.y, 'pacman');
               self.pacman.setSize(16, 16);
               self.pacman.setCollideWorldBounds(true);
-          
+
               // play the animation
               self.pacman.play('munch');
           
               // add the score for that player onto the score board
               self.scoreMap.set(self.socket.id, self.add.text(480, 16, '', { fontSize: '16px', fill: '#FFFFFF' }));
               var scoreText = self.scoreMap.get(self.socket.id);
-              scoreText.setText('Your Score' + ': ' + players[id].score);
+              scoreText.setText(players[id].username + ': ' + players[id].score);
           
               // check for wall collisions
               self.physics.add.collider(self.pacman, worldMap);
           } else {
-              self.otherPlayer = self.physics.add.sprite(players[id].x, players[id].y, 'pacman');
+              var rand = self.dotMap[Math.floor(Math.random() * self.dotMap.length)];
+              self.otherPlayer = self.physics.add.sprite(rand.x, rand.y, 'pacman');
               self.otherPlayer.setSize(16, 16);
               self.otherPlayer.setCollideWorldBounds(true);
               
@@ -227,7 +234,7 @@ var GameScene = {
               // add the score for that player onto the score board
               self.scoreMap.set(self.otherPlayer.playerId, self.add.text(480, 16*(self.otherPlayers.getLength()+1), '', { fontSize: '16px', fill: '#FFFFFF' }));
               var scoreText = self.scoreMap.get(self.otherPlayer.playerId);
-              scoreText.setText(players[id].playerId + ': ' + players[id].score);
+              scoreText.setText(players[id].username + ': ' + players[id].score);
             
               // check for wall collisions
               self.physics.add.collider(self.otherPlayer, worldMap);
@@ -235,25 +242,26 @@ var GameScene = {
           });
       });
 
-        // checks for if a new players added onto server
+      // checks for if a new players added onto server
       this.socket.on('newPlayer', function (playerInfo) {
-          self.otherPlayer = self.physics.add.sprite(playerInfo.x, playerInfo.y, 'pacman');
-          self.otherPlayer.setSize(16, 16);
-          self.otherPlayer.setCollideWorldBounds(true);
-          
-          // play the animation
-          self.otherPlayer.play('munch');
+        var rand = self.dotMap[Math.floor(Math.random() * self.dotMap.length)];
+        self.otherPlayer = self.physics.add.sprite(rand.x, rand.y, 'pacman');
+        self.otherPlayer.setSize(16, 16);
+        self.otherPlayer.setCollideWorldBounds(true);
         
-          self.otherPlayer.playerId = playerInfo.playerId;
-          self.otherPlayers.add(self.otherPlayer);
-          
-          // add the score for that player onto the score board
-          self.scoreMap.set(self.otherPlayer.playerId, self.add.text(480, 16*(self.otherPlayers.getLength()+1), '', { fontSize: '16px', fill: '#FFFFFF' }));
-          var scoreText = self.scoreMap.get(self.otherPlayer.playerId);
-          scoreText.setText(playerInfo.playerId + ': ' + playerInfo.score);
+        // play the animation
+        self.otherPlayer.play('munch');
+      
+        self.otherPlayer.playerId = playerInfo.playerId;
+        self.otherPlayers.add(self.otherPlayer);
         
-          // check for wall collisions
-          self.physics.add.collider(self.otherPlayer, worldMap);
+        // add the score for that player onto the score board
+        self.scoreMap.set(self.otherPlayer.playerId, self.add.text(480, 16*(self.otherPlayers.getLength()+1), '', { fontSize: '16px', fill: '#FFFFFF' }));
+        var scoreText = self.scoreMap.get(self.otherPlayer.playerId);
+        scoreText.setText(playerInfo.username + ': ' + playerInfo.score);
+      
+        // check for wall collisions
+        self.physics.add.collider(self.otherPlayer, worldMap);
       });
 
       // checks for players that disconnect
@@ -292,10 +300,10 @@ var GameScene = {
       Object.keys(players).forEach(function (id) {
           if (players[id].playerId === self.socket.id) {
             var playerScore = self.scoreMap.get(self.socket.id);
-            playerScore.setText('Your Score' + ': ' + players[id].score);
+            playerScore.setText(players[id].username + ': ' + players[id].score);
           } else {
             var otherPlayerScore = self.scoreMap.get(players[id].playerId);
-            otherPlayerScore.setText(players[id].playerId + ': ' + players[id].score);
+            otherPlayerScore.setText(players[id].username + ': ' + players[id].score);
           }
         });
       });
