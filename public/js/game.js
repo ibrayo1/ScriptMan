@@ -85,7 +85,7 @@ var TitleScene = {
 
                 playerText.text = name;
             }
-            else if (name.length < 3)
+            else if (name.length < 7)
             {
                 //  Add
                 name = name.concat(chars[cursor.y][cursor.x]);
@@ -130,7 +130,7 @@ var TitleScene = {
             usrname = name;
             this.scene.launch('GameScene');
         }
-        else if (name.length < 3)
+        else if (name.length < 7)
         {
             //  Add
             name = name.concat(char);
