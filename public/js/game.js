@@ -93,7 +93,8 @@ var TitleScene = {
                 playerText.text = name;
             }
         }
-    })
+    });
+    
     input.on('pointermove', function(pointer, x, y) {
         var cx = Phaser.Math.Snap.Floor(x, 52, 0, true);
         var cy = Phaser.Math.Snap.Floor(y, 64, 0, true);
