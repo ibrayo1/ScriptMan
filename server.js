@@ -11,7 +11,7 @@ var dot = {
   y: 24
 };
 
-var blackdragon = {x: 24, y: 24};
+var blackdragon = {x: 24, y: 24, vx: 100, vy: 100};
 var stringe = {x: 0, y: 0};
 
 app.use(express.static(__dirname + '/public'));
@@ -92,6 +92,8 @@ io.on('connection', function (socket) {
   socket.on('blackdragonMovement', function (dragonLoc) {
     blackdragon.x = dragonLoc.x;
     blackdragon.y = dragonLoc.y;
+    blackdragon.vx = dragonLoc.vx;
+    blackdragon.vy = dragonLoc.vy;
     socket.broadcast.emit('blackdragonMoved', blackdragon);
   });
 

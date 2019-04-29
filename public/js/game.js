@@ -223,6 +223,10 @@ var GameScene = {
       //  Path starts at 24x24
       path = new Phaser.Curves.Path(24, 24);
 
+      graphics.lineStyle(2, 0xffffff, 1);
+
+      path.draw(graphics);
+
       path.lineTo(200, 24);
       path.lineTo(200, 88);
       path.lineTo(152, 88);
@@ -236,8 +240,7 @@ var GameScene = {
       path.lineTo(24, 136);
       path.lineTo(24, 24);
 
-      var dragon_path = [
-        {x: 25, y: 24},
+      this.dragon_path = [
         {x: 200, y: 24},
         {x: 200, y: 88},
         {x: 152, y: 88},
@@ -252,9 +255,7 @@ var GameScene = {
         {x: 24, y: 24}
       ];
 
-      graphics.lineStyle(2, 0xffffff, 1);
-
-      path.draw(graphics);
+      this.dragon_pi = 0;
 
       /*
       var lemming = this.add.follower(path, 24, 24, 'blackdragon');
@@ -274,9 +275,10 @@ var GameScene = {
       
       // listen for current players
       this.socket.on('currentPlayers', function (players) {
+          var rand = self.dotMap[Math.floor(Math.random() * self.dotMap.length)];
           Object.keys(players).forEach(function (id) {
           if (players[id].playerId === self.socket.id) {
-              self.pacman = self.physics.add.sprite(players[id].x, players[id].y, 'pacman');
+              self.pacman = self.physics.add.sprite(rand.x, rand.y, 'pacman');
               self.pacman.setCircle(8, 8, 8);
               // self.pacman.tint =  0xff00ff; can use this to change color of pacman
               self.pacman.setCollideWorldBounds(true);
@@ -379,12 +381,15 @@ var GameScene = {
         self.blackdragon.setCircle(12, 29, 30);
         self.blackdragon.play('dragon-fly');
 
+        self.blackdragon.body.setVelocity(loc.vx, loc.vy).setBounce(1, 1).setCollideWorldBounds(true);
+
         // check for wall collisions, this breaks the dragon movement
         //self.physics.add.collider(self.blackdragon, worldMap);
 
-        //self.physics.add.overlap(self.pacman, self.blackdragon, function () {
-        //  this.socket.emit('blackdragonCollected', {x: rand.x, y: rand.y});
-        //}, null, self);
+        self.physics.add.overlap(self.pacman, self.blackdragon, function () {
+          location.reload(true); //reloads the url
+        }, null, self);
+
       });
 
       /*
@@ -454,19 +459,22 @@ var GameScene = {
     }
 
     if(this.blackdragon){
-      
-      this.blackdragon.body.setVelocityX(20);
 
       var x = this.blackdragon.x;
       var y = this.blackdragon.y;
+      var vx = this.blackdragon.body.velocity.x;
+      var vy = this.blackdragon.body.velocity.y;
       
-      if (this.blackdragon.oldPosition && (x !== this.blackdragon.oldPosition.x || y !== this.blackdragon.oldPosition.y)){
-        this.socket.emit('blackdragonMovement', { x: this.blackdragon.x, y: this.blackdragon.y });
+      if (this.blackdragon.oldPosition && (x !== this.blackdragon.oldPosition.x || y !== this.blackdragon.oldPosition.y || vx !== this.blackdragon.oldPosition.vx || vy !== this.blackdragon.oldPosition.vy )){
+        this.socket.emit('blackdragonMovement', { x: this.blackdragon.x, y: this.blackdragon.y, 
+        vx: this.blackdragon.body.velocity.x, vy: this.blackdragon.body.velocity.y});
       }
 
       this.blackdragon.oldPosition = {
         x: this.blackdragon.x,
-        y: this.blackdragon.y
+        y: this.blackdragon.y,
+        vx: this.blackdragon.body.velocity.x,
+        vy: this.blackdragon.body.velocity.y
       }
     }
   }
@@ -476,12 +484,12 @@ var GameScene = {
 var game = new Phaser.Game({
   type: Phaser.AUTO,
   parent: 'phaser-example',
-  width: 800,
+  width: 800, //448 is the size of the map
   height: 496,
   physics: {
     default: 'arcade',
     arcade: {
-      debug: true,
+      debug: false,
       gravity: { y: 0 }
     }
   },
