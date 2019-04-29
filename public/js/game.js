@@ -153,7 +153,7 @@ var GameScene = {
       this.load.spritesheet('pacman', 'assets/pacman.png', {frameWidth: 32, frameHeight: 32});
       this.load.spritesheet('blackdragon', 'assets/blackdragon.png', {frameWidth: 75, frameHeight: 80});
       this.load.spritesheet('stringe', 'assets/Stringe.png', {frameWidth: 50, frameHeight: 53});
-      this.load.tilemapTiledJSON('map', 'assets/pacman-map.json');
+      // this.load.tilemapTiledJSON('map', 'assets/pacman-map.json');
       this.load.tilemapTiledJSON('map-with-dots', 'assets/pacman-map1.json');
   },
 
@@ -206,7 +206,7 @@ var GameScene = {
         repeat: -1
       });
 
-      /*
+      
       // stringe enemy animation
       this.anims.create({
         key: 'stringe-fly',
@@ -214,7 +214,6 @@ var GameScene = {
         frameRate: 6,
         repeat: -1
       });
-      */
       
       var self = this;
       this.socket = io();
@@ -311,6 +310,11 @@ var GameScene = {
         self.blackdragon.y = dragonInfo.y;
       });
 
+      this.socket.on('stringeMoved', function (stringeInfo){
+        self.stringe.x = stringeInfo.x;
+        self.stringe.y = stringeInfo.y;
+      });
+
       this.socket.on('dotLocation', function (dotLocation) {
           if (self.dot) self.dot.destroy();
           self.dot = self.physics.add.image(dotLocation.x, dotLocation.y, 'Hallenbeck');
@@ -331,7 +335,7 @@ var GameScene = {
 
         self.blackdragon.body.setVelocity(loc.vx, loc.vy).setBounce(1, 1).setCollideWorldBounds(true);
 
-        // check for wall collisions, this breaks the dragon movement
+        // check for wall collisions, this breaks the dragon movement idk why tho
         //self.physics.add.collider(self.blackdragon, worldMap);
 
         self.physics.add.overlap(self.pacman, self.blackdragon, function () {
@@ -340,19 +344,25 @@ var GameScene = {
 
       });
 
-      /*
-      this.socket.on('stringeLocation', function(){
-        var rand = self.dotMap[Math.floor(Math.random() * self.dotMap.length)];
-        self.stringe = self.physics.add.sprite(rand.x, rand.y, 'stringe');
+      this.socket.on('stringeLocation', function(loc){
+        if (self.stringe) self.stringe.destroy();
+        self.stringe = self.physics.add.sprite(loc.x, loc.y, 'stringe');
+
         self.stringe.displayHeight = 50;
         self.stringe.displayWidth = 50;
         self.stringe.setCircle(8, 18, 20);
         self.stringe.play('stringe-fly');
 
+        self.stringe.body.setVelocity(loc.vx, loc.vy).setBounce(1, 1).setCollideWorldBounds(true);
+
         // check for wall collisions
-        self.physics.add.collider(self.stringe, worldMap);
+        // self.physics.add.collider(self.stringe, worldMap);
+
+        self.physics.add.overlap(self.pacman, self.stringe, function () {
+          location.reload(true); //reloads the url
+        }, null, self);
+
       });
-      */
 
       // listens for the the scores for all the players and updates them
       this.socket.on('scoreUpdate', function (players) {
@@ -373,41 +383,40 @@ var GameScene = {
 
   update: function update(){
     if(this.pacman){
-        // Horizontal movement
-        if (cursors.left.isDown) {
-          this.pacman.body.setVelocityX(-150);
-          this.pacman.angle = 180;
-        } else if (cursors.right.isDown) {
-          this.pacman.body.setVelocityX(150);
-          this.pacman.angle = 0;
-        }
-    
-        // Vertical movement
-        if (cursors.up.isDown) {
-          this.pacman.body.setVelocityY(-150);
-          this.pacman.angle = 270;
-        } else if (cursors.down.isDown) {
-          this.pacman.body.setVelocityY(150);
-          this.pacman.angle = 90;
-        }
-    
-        // emit player movement
-        var x = this.pacman.x;
-        var y = this.pacman.y;
-        var a = this.pacman.angle;
-        if (this.pacman.oldPosition && (x !== this.pacman.oldPosition.x || y !== this.pacman.oldPosition.y || a !== this.pacman.oldPosition.angle)) {
-          this.socket.emit('playerMovement', { x: this.pacman.x, y: this.pacman.y, angle: this.pacman.angle });
-        }
-        
-        // save old position data
-        this.pacman.oldPosition = {
-          x: this.pacman.x,
-          y: this.pacman.y
-        };
+      // Horizontal movement
+      if (cursors.left.isDown) {
+        this.pacman.body.setVelocityX(-150);
+        this.pacman.angle = 180;
+      } else if (cursors.right.isDown) {
+        this.pacman.body.setVelocityX(150);
+        this.pacman.angle = 0;
+      }
+  
+      // Vertical movement
+      if (cursors.up.isDown) {
+        this.pacman.body.setVelocityY(-150);
+        this.pacman.angle = 270;
+      } else if (cursors.down.isDown) {
+        this.pacman.body.setVelocityY(150);
+        this.pacman.angle = 90;
+      }
+  
+      // emit player movement
+      var x = this.pacman.x;
+      var y = this.pacman.y;
+      var a = this.pacman.angle;
+      if (this.pacman.oldPosition && (x !== this.pacman.oldPosition.x || y !== this.pacman.oldPosition.y || a !== this.pacman.oldPosition.angle)) {
+        this.socket.emit('playerMovement', { x: this.pacman.x, y: this.pacman.y, angle: this.pacman.angle });
+      }
+      
+      // save old position data
+      this.pacman.oldPosition = {
+        x: this.pacman.x,
+        y: this.pacman.y
+      };
     }
 
     if(this.blackdragon){
-
       var x = this.blackdragon.x;
       var y = this.blackdragon.y;
       var vx = this.blackdragon.body.velocity.x;
@@ -425,6 +434,24 @@ var GameScene = {
         vy: this.blackdragon.body.velocity.y
       }
     }
+
+    if(this.stringe){
+      var x = this.stringe.x;
+      var y = this.stringe.y;
+      var vx = this.stringe.body.velocity.x;
+      var vy = this.stringe.body.velocity.y;
+
+      if(this.stringe.oldPosition && (x !== this.stringe.oldPosition.x || y !== this.stringe.oldPosition.y || vx !== this.stringe.oldPosition.vx || vy !== this.stringe.oldPosition.vy)){
+        this.socket.emit('stringeMovement', {x: this.stringe.x, y: this.stringe.y, vx: this.stringe.body.velocity.x, vy: this.stringe.body.velocity.y});
+      }
+
+      this.stringe.oldPosition = {
+        x: this.stringe.x,
+        y: this.stringe.y,
+        vx: this.stringe.body.velocity.x,
+        vy: this.stringe.body.velocity.y
+      }
+    }
   }
 
 }
@@ -437,7 +464,7 @@ var game = new Phaser.Game({
   physics: {
     default: 'arcade',
     arcade: {
-      debug: false,
+      debug: true,
       gravity: { y: 0 }
     }
   },

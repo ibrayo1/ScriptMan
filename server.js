@@ -12,7 +12,7 @@ var dot = {
 };
 
 var blackdragon = {x: 24, y: 24, vx: 100, vy: 100};
-var stringe = {x: 0, y: 0};
+var stringe = {x: 150, y: 150, vx: -100, vy: 100};
 
 app.use(express.static(__dirname + '/public'));
  
@@ -46,9 +46,11 @@ io.on('connection', function (socket) {
   // send the dot object to new player
   socket.emit('dotLocation', dot);
 
+  // send the draogn location to player
   socket.emit('blackdragonLocation', blackdragon);
 
-  //io.emit('stringeLocation', stringe);
+  // send the stringe location to player
+  socket.emit('stringeLocation', stringe);
 
   // update all other players of the new player
   socket.broadcast.emit('newPlayer', players[socket.id]);
@@ -95,6 +97,14 @@ io.on('connection', function (socket) {
     blackdragon.vx = dragonLoc.vx;
     blackdragon.vy = dragonLoc.vy;
     socket.broadcast.emit('blackdragonMoved', blackdragon);
+  });
+
+  socket.on('stringeMovement', function(stringeLoc){
+    stringe.x = stringeLoc.x;
+    stringe.y = stringeLoc.y;
+    stringe.vx = stringeLoc.vx;
+    stringe.vy = stringeLoc.vy;
+    socket.broadcast.emit('stringeMoved', stringe);
   });
 
 });
