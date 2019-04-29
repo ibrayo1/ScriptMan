@@ -7,9 +7,12 @@ var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 var players = {};
 var dot = {
-  x: 30,
-  y: 30
+  x: 24,
+  y: 24
 };
+
+var blackdragon = {x: 24, y: 24};
+var stringe = {x: 0, y: 0};
 
 app.use(express.static(__dirname + '/public'));
  
@@ -20,7 +23,7 @@ app.get('/', function (req, res) {
 io.on('connection', function (socket) {
   console.log('a user connected');
   // create a new player and add it to our players object
-  console.log('their socket.id: ' + socket.id)
+  console.log('their socket.id: ' + socket.id);
   players[socket.id] = new Account(
     socket.id, // ID
     (14 * 16) + 8, // x
@@ -29,7 +32,7 @@ io.on('connection', function (socket) {
     0, // score intialized to zero
     '', // username is intialized to empty string
   );
- 
+
   // sets the name of the player
   socket.on('playerName', function(nameData){
     players[socket.id].username = nameData.username;
@@ -42,6 +45,10 @@ io.on('connection', function (socket) {
 
   // send the dot object to new player
   socket.emit('dotLocation', dot);
+
+  socket.emit('blackdragonLocation', blackdragon);
+
+  //io.emit('stringeLocation', stringe);
 
   // update all other players of the new player
   socket.broadcast.emit('newPlayer', players[socket.id]);
@@ -63,12 +70,15 @@ io.on('connection', function (socket) {
     players[socket.id].x = movementData.x;
     players[socket.id].y = movementData.y;
     players[socket.id].angle = movementData.angle;
+
+    //console.log(players[socket.id].x + ' ' + players[socket.id].y);
+
     // emit a message to all players about the player that moved
     socket.broadcast.emit('playerMoved', players[socket.id]);
   });
 
   socket.on('dotCollected', function (dotLoc) {
-    players[socket.id].score += 10;
+    players[socket.id].score += 342;
 
     console.log(players[socket.id].score); // for debugging purposes
     
@@ -77,6 +87,12 @@ io.on('connection', function (socket) {
     io.emit('dotLocation', dot);
     // emit a message to all player that updated his score
     io.emit('scoreUpdate', players);
+  });
+
+  socket.on('blackdragonMovement', function (dragonLoc) {
+    blackdragon.x = dragonLoc.x;
+    blackdragon.y = dragonLoc.y;
+    socket.broadcast.emit('blackdragonMoved', blackdragon);
   });
 
 });

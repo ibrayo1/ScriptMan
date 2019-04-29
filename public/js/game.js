@@ -1,7 +1,7 @@
 var usrname = '';
 
-var TitleScene = {
-  key: 'TitleScene',
+var NameInputScene = {
+  key: 'NameInputScene',
 
   preload: function preload(){
     this.load.image('block', 'assets/input/block.png')
@@ -142,7 +142,6 @@ var TitleScene = {
   }
 }
 
-
 var GameScene = {
   key: 'GameScene',
 
@@ -152,13 +151,15 @@ var GameScene = {
       this.load.image('Hallenbeck', 'assets/Hallenbeck.png', {frameWidth: 32, frameHeight: 32});
       this.load.image('tiles', 'assets/pacman-tiles.png');
       this.load.spritesheet('pacman', 'assets/pacman.png', {frameWidth: 32, frameHeight: 32});
+      this.load.spritesheet('blackdragon', 'assets/blackdragon.png', {frameWidth: 75, frameHeight: 80});
+      this.load.spritesheet('stringe', 'assets/Stringe.png', {frameWidth: 50, frameHeight: 53});
       this.load.tilemapTiledJSON('map', 'assets/pacman-map.json');
       this.load.tilemapTiledJSON('map-with-dots', 'assets/pacman-map1.json');
   },
 
   create: function create(){
       // destroys the TitleScene
-      this.scene.remove('TitleScene');
+      this.scene.remove('NameInputScene');
 
       // renders the map
       const map = this.make.tilemap({key: 'map-with-dots'});
@@ -196,6 +197,76 @@ var GameScene = {
           repeat: -1
       });
 
+
+      // dragon enemy animation
+      this.anims.create({
+        key: 'dragon-fly',
+        frames: this.anims.generateFrameNumbers('blackdragon', {start: 0, end: 4}),
+        frameRate: 6,
+        repeat: -1
+      });
+
+      /*
+      // stringe enemy animation
+      this.anims.create({
+        key: 'stringe-fly',
+        frames: this.anims.generateFrameNumbers('stringe', {start: 0, end: 1}),
+        frameRate: 6,
+        repeat: -1
+      });
+      */
+
+      graphics = this.add.graphics();
+
+      follower = { t: 0, vec: new Phaser.Math.Vector2() };
+
+      //  Path starts at 24x24
+      path = new Phaser.Curves.Path(24, 24);
+
+      path.lineTo(200, 24);
+      path.lineTo(200, 88);
+      path.lineTo(152, 88);
+      path.lineTo(152, 136);
+      path.lineTo(200, 136);
+      path.lineTo(200, 184);
+      path.lineTo(152, 184);
+      path.lineTo(152, 232);
+      path.lineTo(104, 232);
+      path.lineTo(104, 136);
+      path.lineTo(24, 136);
+      path.lineTo(24, 24);
+
+      var dragon_path = [
+        {x: 25, y: 24},
+        {x: 200, y: 24},
+        {x: 200, y: 88},
+        {x: 152, y: 88},
+        {x: 152, y: 136},
+        {x: 200, y: 136},
+        {x: 200, y: 184},
+        {x: 152, y: 184},
+        {x: 152, y: 232},
+        {x: 104, y: 232},
+        {x: 104, y: 136},
+        {x: 24, y: 136},
+        {x: 24, y: 24}
+      ];
+
+      graphics.lineStyle(2, 0xffffff, 1);
+
+      path.draw(graphics);
+
+      /*
+      var lemming = this.add.follower(path, 24, 24, 'blackdragon');
+
+      lemming.startFollow({
+          duration: 6000,
+          yoyo: false,
+          repeat: -1,
+          rotateToPath: false
+      });
+      */
+      
       var self = this;
       this.socket = io();
       this.socket.emit('playerName', {username: usrname});
@@ -205,9 +276,9 @@ var GameScene = {
       this.socket.on('currentPlayers', function (players) {
           Object.keys(players).forEach(function (id) {
           if (players[id].playerId === self.socket.id) {
-              var rand = self.dotMap[Math.floor(Math.random() * self.dotMap.length)];
-              self.pacman = self.physics.add.sprite(rand.x, rand.y, 'pacman');
+              self.pacman = self.physics.add.sprite(players[id].x, players[id].y, 'pacman');
               self.pacman.setCircle(8, 8, 8);
+              // self.pacman.tint =  0xff00ff; can use this to change color of pacman
               self.pacman.setCollideWorldBounds(true);
 
               // play the animation
@@ -221,8 +292,7 @@ var GameScene = {
               // check for wall collisions
               self.physics.add.collider(self.pacman, worldMap);
           } else {
-              var rand = self.dotMap[Math.floor(Math.random() * self.dotMap.length)];
-              self.otherPlayer = self.physics.add.sprite(rand.x, rand.y, 'pacman');
+              self.otherPlayer = self.physics.add.sprite(players[id].x, players[id].y, 'pacman');
               self.otherPlayer.setCircle(8, 8, 8);
               self.otherPlayer.setCollideWorldBounds(true);
               
@@ -245,8 +315,7 @@ var GameScene = {
 
       // checks for if a new players added onto server
       this.socket.on('newPlayer', function (playerInfo) {
-        var rand = self.dotMap[Math.floor(Math.random() * self.dotMap.length)];
-        self.otherPlayer = self.physics.add.sprite(rand.x, rand.y, 'pacman');
+        self.otherPlayer = self.physics.add.sprite(playerInfo.x, playerInfo.y, 'pacman');
         self.otherPlayer.setCircle(8, 8, 8);
         self.otherPlayer.setCollideWorldBounds(true);
         
@@ -280,11 +349,16 @@ var GameScene = {
       // listen for player movements
       this.socket.on('playerMoved', function (playerInfo) {
           self.otherPlayers.getChildren().forEach(function (otherPlayer) {
-          if (playerInfo.playerId === otherPlayer.playerId) {
-              otherPlayer.setAngle(playerInfo.angle);
-              otherPlayer.setPosition(playerInfo.x, playerInfo.y);
-          }
+            if (playerInfo.playerId === otherPlayer.playerId) {
+                otherPlayer.setAngle(playerInfo.angle);
+                otherPlayer.setPosition(playerInfo.x, playerInfo.y);
+            }
           });
+      });
+
+      this.socket.on('blackdragonMoved', function (dragonInfo){
+        self.blackdragon.x = dragonInfo.x;
+        self.blackdragon.y = dragonInfo.y;
       });
 
       this.socket.on('dotLocation', function (dotLocation) {
@@ -296,6 +370,37 @@ var GameScene = {
           }, null, self);
       });
       
+      this.socket.on('blackdragonLocation', function (loc) {
+        if (self.blackdragon) self.blackdragon.destroy();
+        self.blackdragon = self.physics.add.sprite(loc.x, loc.y, 'blackdragon');
+      
+        self.blackdragon.displayHeight = 48;
+        self.blackdragon.displayWidth = 48;
+        self.blackdragon.setCircle(12, 29, 30);
+        self.blackdragon.play('dragon-fly');
+
+        // check for wall collisions, this breaks the dragon movement
+        //self.physics.add.collider(self.blackdragon, worldMap);
+
+        //self.physics.add.overlap(self.pacman, self.blackdragon, function () {
+        //  this.socket.emit('blackdragonCollected', {x: rand.x, y: rand.y});
+        //}, null, self);
+      });
+
+      /*
+      this.socket.on('stringeLocation', function(){
+        var rand = self.dotMap[Math.floor(Math.random() * self.dotMap.length)];
+        self.stringe = self.physics.add.sprite(rand.x, rand.y, 'stringe');
+        self.stringe.displayHeight = 50;
+        self.stringe.displayWidth = 50;
+        self.stringe.setCircle(8, 18, 20);
+        self.stringe.play('stringe-fly');
+
+        // check for wall collisions
+        self.physics.add.collider(self.stringe, worldMap);
+      });
+      */
+
       // listens for the the scores for all the players and updates them
       this.socket.on('scoreUpdate', function (players) {
       Object.keys(players).forEach(function (id) {
@@ -346,7 +451,23 @@ var GameScene = {
           x: this.pacman.x,
           y: this.pacman.y
         };
-    
+    }
+
+    if(this.blackdragon){
+      
+      this.blackdragon.body.setVelocityX(20);
+
+      var x = this.blackdragon.x;
+      var y = this.blackdragon.y;
+      
+      if (this.blackdragon.oldPosition && (x !== this.blackdragon.oldPosition.x || y !== this.blackdragon.oldPosition.y)){
+        this.socket.emit('blackdragonMovement', { x: this.blackdragon.x, y: this.blackdragon.y });
+      }
+
+      this.blackdragon.oldPosition = {
+        x: this.blackdragon.x,
+        y: this.blackdragon.y
+      }
     }
   }
 
@@ -360,9 +481,9 @@ var game = new Phaser.Game({
   physics: {
     default: 'arcade',
     arcade: {
-      debug: false,
+      debug: true,
       gravity: { y: 0 }
     }
   },
-  scene: [TitleScene, GameScene]
+  scene: [NameInputScene, GameScene]
 });
