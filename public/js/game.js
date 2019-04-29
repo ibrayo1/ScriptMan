@@ -215,58 +215,6 @@ var GameScene = {
         repeat: -1
       });
       */
-
-      graphics = this.add.graphics();
-
-      follower = { t: 0, vec: new Phaser.Math.Vector2() };
-
-      //  Path starts at 24x24
-      path = new Phaser.Curves.Path(24, 24);
-
-      graphics.lineStyle(2, 0xffffff, 1);
-
-      path.draw(graphics);
-
-      path.lineTo(200, 24);
-      path.lineTo(200, 88);
-      path.lineTo(152, 88);
-      path.lineTo(152, 136);
-      path.lineTo(200, 136);
-      path.lineTo(200, 184);
-      path.lineTo(152, 184);
-      path.lineTo(152, 232);
-      path.lineTo(104, 232);
-      path.lineTo(104, 136);
-      path.lineTo(24, 136);
-      path.lineTo(24, 24);
-
-      this.dragon_path = [
-        {x: 200, y: 24},
-        {x: 200, y: 88},
-        {x: 152, y: 88},
-        {x: 152, y: 136},
-        {x: 200, y: 136},
-        {x: 200, y: 184},
-        {x: 152, y: 184},
-        {x: 152, y: 232},
-        {x: 104, y: 232},
-        {x: 104, y: 136},
-        {x: 24, y: 136},
-        {x: 24, y: 24}
-      ];
-
-      this.dragon_pi = 0;
-
-      /*
-      var lemming = this.add.follower(path, 24, 24, 'blackdragon');
-
-      lemming.startFollow({
-          duration: 6000,
-          yoyo: false,
-          repeat: -1,
-          rotateToPath: false
-      });
-      */
       
       var self = this;
       this.socket = io();
