@@ -417,6 +417,13 @@ var GameScene = {
     }
 
     if(this.blackdragon){
+
+      if(this.blackdragon.body.velocity.x < 0){
+        this.blackdragon.flipX = false;
+      }else if(this.blackdragon.body.velocity.x > 0){
+        this.blackdragon.flipX = true;
+      }
+
       var x = this.blackdragon.x;
       var y = this.blackdragon.y;
       var vx = this.blackdragon.body.velocity.x;
@@ -436,6 +443,13 @@ var GameScene = {
     }
 
     if(this.stringe){
+
+      if(this.stringe.body.velocity.x < 0){
+        this.stringe.flipX = false;
+      } else if (this.stringe.body.velocity.x > 0){
+        this.stringe.flipX = true;
+      }
+
       var x = this.stringe.x;
       var y = this.stringe.y;
       var vx = this.stringe.body.velocity.x;
