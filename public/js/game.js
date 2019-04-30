@@ -161,6 +161,9 @@ var GameScene = {
       // destroys the TitleScene
       this.scene.remove('NameInputScene');
 
+      // this resets the world bound collisions
+      this.physics.world.setBounds(0, 0, 448, 496, true, true, true, true);
+
       // renders the map
       const map = this.make.tilemap({key: 'map-with-dots'});
       const tileset = map.addTilesetImage("pacman-tiles", "tiles");
@@ -537,7 +540,7 @@ var game = new Phaser.Game({
   physics: {
     default: 'arcade',
     arcade: {
-      debug: true,
+      debug: false,
       gravity: { y: 0 }
     }
   },
