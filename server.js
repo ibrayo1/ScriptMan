@@ -14,6 +14,7 @@ var dot = {
 var blackdragon = {x: 24, y: 24, vx: 100, vy: 100};
 var stringe = {x: 150, y: 150, vx: -100, vy: 100};
 var innerrage = {x: 200, y: 400, vx: 100, vy: -100};
+var jrreaper = {x: 430, y: 480, vx: -100, vy: -100};
 
 app.use(express.static(__dirname + '/public'));
  
@@ -55,6 +56,9 @@ io.on('connection', function (socket) {
 
   // send the inner rage enemy location to player
   socket.emit('innerrageLocation', innerrage);
+
+  // sned the jr repear enemy location to player
+  socket.emit('jrreaperLocation', jrreaper);
 
   // update all other players of the new player
   socket.broadcast.emit('newPlayer', players[socket.id]);
@@ -117,6 +121,14 @@ io.on('connection', function (socket) {
     innerrage.vx = innerrageLoc.vx;
     innerrage.vy = innerrageLoc.vy;
     socket.broadcast.emit('innerrageMoved', innerrage);
+  });
+
+  socket.on('jrreaperMovement', function(jrreaperLoc){
+    jrreaper.x = jrreaperLoc.x;
+    jrreaper.y = jrreaperLoc.y;
+    jrreaper.vx = jrreaperLoc.vx;
+    jrreaper.vy = jrreaperLoc.vy;
+    socket.broadcast.emit('jrreaperMoved', jrreaper);
   });
 
 });

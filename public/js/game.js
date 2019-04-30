@@ -154,6 +154,7 @@ var GameScene = {
       this.load.spritesheet('blackdragon', 'assets/blackdragon.png', {frameWidth: 75, frameHeight: 80});
       this.load.spritesheet('stringe', 'assets/Stringe.png', {frameWidth: 50, frameHeight: 53});
       this.load.spritesheet('innerrage', 'assets/InnerRage.png', {frameWidth: 139, frameHeight: 181});
+      this.load.spritesheet('jrreaper', 'assets/JrReaper.png', {frameWidth: 42, frameHeight: 41});
       this.load.tilemapTiledJSON('map-with-dots', 'assets/pacman-map1.json');
   },
 
@@ -224,7 +225,15 @@ var GameScene = {
         frames: this.anims.generateFrameNumbers('innerrage', {start: 0, end: 7}),
         frameRate: 6,
         repeat: -1
-      })
+      });
+
+      // Jr Reaper enemy animation
+      this.anims.create({
+        key: 'jrreaper-anim',
+        frames: this.anims.generateFrameNumbers('jrreaper', {start: 0, end: 7}),
+        frameRate: 6,
+        repeat: -1
+      });
       
       var self = this;
       this.socket = io();
@@ -334,6 +343,11 @@ var GameScene = {
         self.innerrage.y = innerrageInfo.y;
       });
 
+      this.socket.on('jrreaperMoved', function(jrreaperInfo){
+        self.jrreaper.x = jrreaperInfo.x;
+        self.jrreaper.y = jrreaperInfo.y;
+      });
+
       this.socket.on('dotLocation', function (dotLocation) {
           if (self.dot) self.dot.destroy();
           self.dot = self.physics.add.image(dotLocation.x, dotLocation.y, 'Hallenbeck');
@@ -389,6 +403,7 @@ var GameScene = {
 
         self.innerrage.displayHeight = 60;
         self.innerrage.displayWidth = 60;
+        self.innerrage.setCircle(35, 38, 70);
         self.innerrage.play('innerrage-stand');
 
         self.innerrage.body.setVelocity(loc.vx, loc.vy).setBounce(1, 1).setCollideWorldBounds(true);
@@ -396,6 +411,23 @@ var GameScene = {
         self.physics.add.overlap(self.pacman, self.innerrage, function(){
           location.reload(true); //reloads the url
         }, null , self);
+
+      });
+
+      this.socket.on('jrreaperLocation', function(loc){
+        if(self.jrreaper) self.jrreaper.destroy();
+        self.jrreaper = self.physics.add.sprite(loc.x, loc.y, 'jrreaper');
+
+        //self.jrreaper.displayHeight = 55;
+        //self.jrreaper.displayWidth = 55;
+        // self.jrreaper.setCircle(1, 1, 1); ill take care of this later
+        self.jrreaper.play('jrreaper-anim');
+
+        self.jrreaper.body.setVelocity(loc.vx, loc.vy).setBounce(1, 1).setCollideWorldBounds(true);
+
+        self.physics.add.overlap(self.pacman, self.jrreaper, function(){
+          location.reload(true); //reloads the url 
+        }, null, self);
 
       });
 
@@ -516,7 +548,7 @@ var GameScene = {
       var vy = this.innerrage.body.velocity.y;
 
       if(this.innerrage.oldPosition && (x !== this.innerrage.oldPosition.x || y != this.innerrage.oldPosition.y || 
-        vx !== this.innerrage.body.velocity.x || vy !== this.innerrage.body.velocity.y )){
+        vx !== this.innerrage.oldPosition.vx || vy !== this.innerrage.oldPosition.vy )){
           this.socket.emit('innerrageMovement', {x: this.innerrage.x, y: this.innerrage.y, vx: this.innerrage.body.velocity.x, vy: this.innerrage.body.velocity.y});
         }
 
@@ -527,6 +559,31 @@ var GameScene = {
         vy: this.innerrage.body.velocity.y
       }
 
+    }
+
+    if(this.jrreaper){
+      if(this.jrreaper.body.velocity.x < 0){
+        this.jrreaper.flipX = false;
+      } else if (this.jrreaper.body.velocity.x > 0){
+        this.jrreaper.flipX = true;
+      }
+
+      var x = this.jrreaper.x;
+      var y = this.jrreaper.y;
+      var vx = this.jrreaper.body.velocity.x;
+      var vy = this.jrreaper.body.velocity.y;
+
+      if(this.jrreaper.oldPosition && (x !== this.jrreaper.oldPosition.x || y !== this.jrreaper.oldPosition.y || 
+        vx !== this.jrreaper.oldPosition.vx || vy !== this.jrreaper.oldPosition.vy)){
+          this.socket.emit('jrreaperMovement', {x: this.jrreaper.x, y: this.jrreaper.y, vx: this.jrreaper.body.velocity.x, vy: this.jrreaper.body.velocity.y});
+      }
+
+      this.jrreaper.oldPosition = {
+        x: this.jrreaper.x,
+        y: this.jrreaper.y,
+        vx: this.jrreaper.body.velocity.x,
+        vy: this.jrreaper.body.velocity.y
+      }
     }
   }
 
