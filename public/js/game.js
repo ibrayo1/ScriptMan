@@ -153,7 +153,7 @@ var GameScene = {
       this.load.spritesheet('pacman', 'assets/pacman.png', {frameWidth: 32, frameHeight: 32});
       this.load.spritesheet('blackdragon', 'assets/blackdragon.png', {frameWidth: 75, frameHeight: 80});
       this.load.spritesheet('stringe', 'assets/Stringe.png', {frameWidth: 50, frameHeight: 53});
-      // this.load.tilemapTiledJSON('map', 'assets/pacman-map.json');
+      this.load.spritesheet('innerrage', 'assets/InnerRage.png', {frameWidth: 139, frameHeight: 181});
       this.load.tilemapTiledJSON('map-with-dots', 'assets/pacman-map1.json');
   },
 
@@ -214,6 +214,14 @@ var GameScene = {
         frameRate: 6,
         repeat: -1
       });
+
+      // inner rage standing enemy animation
+      this.anims.create({
+        key: 'innerrage-stand',
+        frames: this.anims.generateFrameNumbers('innerrage', {start: 0, end: 7}),
+        frameRate: 6,
+        repeat: -1
+      })
       
       var self = this;
       this.socket = io();
@@ -305,14 +313,22 @@ var GameScene = {
           });
       });
 
+      // listen for dragon movement
       this.socket.on('blackdragonMoved', function (dragonInfo){
         self.blackdragon.x = dragonInfo.x;
         self.blackdragon.y = dragonInfo.y;
       });
 
+      // listen for stringe movement
       this.socket.on('stringeMoved', function (stringeInfo){
         self.stringe.x = stringeInfo.x;
         self.stringe.y = stringeInfo.y;
+      });
+
+      // listen for inner rage movement
+      this.socket.on('innerrageMoved', function (innerrageInfo){
+        self.innerrage.x = innerrageInfo.x;
+        self.innerrage.y = innerrageInfo.y;
       });
 
       this.socket.on('dotLocation', function (dotLocation) {
@@ -328,8 +344,8 @@ var GameScene = {
         if (self.blackdragon) self.blackdragon.destroy();
         self.blackdragon = self.physics.add.sprite(loc.x, loc.y, 'blackdragon');
       
-        self.blackdragon.displayHeight = 48;
-        self.blackdragon.displayWidth = 48;
+        self.blackdragon.displayHeight = 60;
+        self.blackdragon.displayWidth = 60;
         self.blackdragon.setCircle(12, 29, 30);
         self.blackdragon.play('dragon-fly');
 
@@ -361,6 +377,22 @@ var GameScene = {
         self.physics.add.overlap(self.pacman, self.stringe, function () {
           location.reload(true); //reloads the url
         }, null, self);
+
+      });
+
+      this.socket.on('innerrageLocation', function(loc){
+        if(self.innerrage) self.innerrage.destroy();
+        self.innerrage = self.physics.add.sprite(loc.x, loc.y, 'innerrage');
+
+        self.innerrage.displayHeight = 60;
+        self.innerrage.displayWidth = 60;
+        self.innerrage.play('innerrage-stand');
+
+        self.innerrage.body.setVelocity(loc.vx, loc.vy).setBounce(1, 1).setCollideWorldBounds(true);
+
+        self.physics.add.overlap(self.pacman, self.innerrage, function(){
+          location.reload(true); //reloads the url
+        }, null , self);
 
       });
 
@@ -466,6 +498,33 @@ var GameScene = {
         vy: this.stringe.body.velocity.y
       }
     }
+
+    if(this.innerrage){
+      
+      if(this.innerrage.body.velocity.x < 0){
+        this.innerrage.flipX = true;
+      } else if (this.innerrage.body.velocity.x > 0){
+        this.innerrage.flipX = false;
+      }
+
+      var x = this.innerrage.x;
+      var y = this.innerrage.y;
+      var vx = this.innerrage.body.velocity.x;
+      var vy = this.innerrage.body.velocity.y;
+
+      if(this.innerrage.oldPosition && (x !== this.innerrage.oldPosition.x || y != this.innerrage.oldPosition.y || 
+        vx !== this.innerrage.body.velocity.x || vy !== this.innerrage.body.velocity.y )){
+          this.socket.emit('innerrageMovement', {x: this.innerrage.x, y: this.innerrage.y, vx: this.innerrage.body.velocity.x, vy: this.innerrage.body.velocity.y});
+        }
+
+      this.innerrage.oldPosition = {
+        x: this.innerrage.x,
+        y: this.innerrage.y,
+        vx: this.innerrage.body.velocity.x,
+        vy: this.innerrage.body.velocity.y
+      }
+
+    }
   }
 
 }
@@ -478,7 +537,7 @@ var game = new Phaser.Game({
   physics: {
     default: 'arcade',
     arcade: {
-      debug: false,
+      debug: true,
       gravity: { y: 0 }
     }
   },
