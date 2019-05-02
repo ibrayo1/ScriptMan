@@ -178,6 +178,11 @@ var GameScene = {
 
       this.scoreMap = new Map(); //creates and holds the scores for all players in the world
 
+      //Add a group to hold all our dots
+      this.dots = this.physics.add.group({
+        key: 'dots'
+      });
+
       // this removes all the dots from the map
       worldMap.forEachTile( tile => {
           if (tile.index === 7) {
@@ -282,6 +287,20 @@ var GameScene = {
           });
       });
 
+      //Listen for the incoming dotmap
+      this.socket.on('dotMap', function (dotArray) {
+        for(var i = 0; i < dotArray.length; i++){
+            var dot = self.physics.add.image(self.dotMap[i].x, self.dotMap[i].y, 'dot');
+            dot.mapIndex = i;
+            self.dots.add(dot);
+        }
+      });
+
+      //Listens for if we need to remove a dot
+      this.socket.on('removeDot', function (i){
+        self.dots.getChildren()[i].destroy();
+      })
+
       // checks for if a new players added onto server
       this.socket.on('newPlayer', function (playerInfo) {
         self.otherPlayer = self.physics.add.sprite(playerInfo.x, playerInfo.y, 'pacman');
@@ -325,29 +344,6 @@ var GameScene = {
           });
       });
 
-      // listen for dragon movement
-      this.socket.on('blackdragonMoved', function (dragonInfo){
-        self.blackdragon.x = dragonInfo.x;
-        self.blackdragon.y = dragonInfo.y;
-      });
-
-      // listen for stringe movement
-      this.socket.on('stringeMoved', function (stringeInfo){
-        self.stringe.x = stringeInfo.x;
-        self.stringe.y = stringeInfo.y;
-      });
-
-      // listen for inner rage movement
-      this.socket.on('innerrageMoved', function (innerrageInfo){
-        self.innerrage.x = innerrageInfo.x;
-        self.innerrage.y = innerrageInfo.y;
-      });
-
-      this.socket.on('jrreaperMoved', function(jrreaperInfo){
-        self.jrreaper.x = jrreaperInfo.x;
-        self.jrreaper.y = jrreaperInfo.y;
-      });
-
       this.socket.on('dotLocation', function (dotLocation) {
           if (self.dot) self.dot.destroy();
           self.dot = self.physics.add.image(dotLocation.x, dotLocation.y, 'Hallenbeck');
@@ -355,80 +351,6 @@ var GameScene = {
           self.physics.add.overlap(self.pacman, self.dot, function () {
             this.socket.emit('dotCollected', {x: rand.x, y: rand.y});
           }, null, self);
-      });
-      
-      this.socket.on('blackdragonLocation', function (loc) {
-        if (self.blackdragon) self.blackdragon.destroy();
-        self.blackdragon = self.physics.add.sprite(loc.x, loc.y, 'blackdragon');
-      
-        self.blackdragon.displayHeight = 60;
-        self.blackdragon.displayWidth = 60;
-        self.blackdragon.setCircle(12, 29, 30);
-        self.blackdragon.play('dragon-fly');
-
-        self.blackdragon.body.setVelocity(loc.vx, loc.vy).setBounce(1, 1).setCollideWorldBounds(true);
-
-        // check for wall collisions, this breaks the dragon movement idk why tho
-        //self.physics.add.collider(self.blackdragon, worldMap);
-
-        self.physics.add.overlap(self.pacman, self.blackdragon, function () {
-          location.reload(true); //reloads the url
-        }, null, self);
-
-      });
-
-      this.socket.on('stringeLocation', function(loc){
-        if (self.stringe) self.stringe.destroy();
-        self.stringe = self.physics.add.sprite(loc.x, loc.y, 'stringe');
-
-        self.stringe.displayHeight = 50;
-        self.stringe.displayWidth = 50;
-        self.stringe.setCircle(8, 18, 20);
-        self.stringe.play('stringe-fly');
-
-        self.stringe.body.setVelocity(loc.vx, loc.vy).setBounce(1, 1).setCollideWorldBounds(true);
-
-        // check for wall collisions
-        // self.physics.add.collider(self.stringe, worldMap);
-
-        self.physics.add.overlap(self.pacman, self.stringe, function () {
-          location.reload(true); //reloads the url
-        }, null, self);
-
-      });
-
-      this.socket.on('innerrageLocation', function(loc){
-        if(self.innerrage) self.innerrage.destroy();
-        self.innerrage = self.physics.add.sprite(loc.x, loc.y, 'innerrage');
-
-        self.innerrage.displayHeight = 60;
-        self.innerrage.displayWidth = 60;
-        self.innerrage.setCircle(35, 38, 70);
-        self.innerrage.play('innerrage-stand');
-
-        self.innerrage.body.setVelocity(loc.vx, loc.vy).setBounce(1, 1).setCollideWorldBounds(true);
-
-        self.physics.add.overlap(self.pacman, self.innerrage, function(){
-          location.reload(true); //reloads the url
-        }, null , self);
-
-      });
-
-      this.socket.on('jrreaperLocation', function(loc){
-        if(self.jrreaper) self.jrreaper.destroy();
-        self.jrreaper = self.physics.add.sprite(loc.x, loc.y, 'jrreaper');
-
-        //self.jrreaper.displayHeight = 55;
-        //self.jrreaper.displayWidth = 55;
-        // self.jrreaper.setCircle(1, 1, 1); ill take care of this later
-        self.jrreaper.play('jrreaper-anim');
-
-        self.jrreaper.body.setVelocity(loc.vx, loc.vy).setBounce(1, 1).setCollideWorldBounds(true);
-
-        self.physics.add.overlap(self.pacman, self.jrreaper, function(){
-          location.reload(true); //reloads the url 
-        }, null, self);
-
       });
 
       // listens for the the scores for all the players and updates them
@@ -450,6 +372,7 @@ var GameScene = {
 
   update: function update(){
     if(this.pacman){
+      this.physics.add.overlap(this.pacman, this.dots, collectDot, null, this);
       // Horizontal movement
       if (cursors.left.isDown) {
         this.pacman.body.setVelocityX(-150);
@@ -482,111 +405,13 @@ var GameScene = {
         y: this.pacman.y
       };
     }
-
-    if(this.blackdragon){
-
-      if(this.blackdragon.body.velocity.x < 0){
-        this.blackdragon.flipX = false;
-      }else if(this.blackdragon.body.velocity.x > 0){
-        this.blackdragon.flipX = true;
-      }
-
-      var x = this.blackdragon.x;
-      var y = this.blackdragon.y;
-      var vx = this.blackdragon.body.velocity.x;
-      var vy = this.blackdragon.body.velocity.y;
-      
-      if (this.blackdragon.oldPosition && (x !== this.blackdragon.oldPosition.x || y !== this.blackdragon.oldPosition.y || vx !== this.blackdragon.oldPosition.vx || vy !== this.blackdragon.oldPosition.vy )){
-        this.socket.emit('blackdragonMovement', { x: this.blackdragon.x, y: this.blackdragon.y, 
-        vx: this.blackdragon.body.velocity.x, vy: this.blackdragon.body.velocity.y});
-      }
-
-      this.blackdragon.oldPosition = {
-        x: this.blackdragon.x,
-        y: this.blackdragon.y,
-        vx: this.blackdragon.body.velocity.x,
-        vy: this.blackdragon.body.velocity.y
-      }
-    }
-
-    if(this.stringe){
-
-      if(this.stringe.body.velocity.x < 0){
-        this.stringe.flipX = false;
-      } else if (this.stringe.body.velocity.x > 0){
-        this.stringe.flipX = true;
-      }
-
-      var x = this.stringe.x;
-      var y = this.stringe.y;
-      var vx = this.stringe.body.velocity.x;
-      var vy = this.stringe.body.velocity.y;
-
-      if(this.stringe.oldPosition && (x !== this.stringe.oldPosition.x || y !== this.stringe.oldPosition.y || vx !== this.stringe.oldPosition.vx || vy !== this.stringe.oldPosition.vy)){
-        this.socket.emit('stringeMovement', {x: this.stringe.x, y: this.stringe.y, vx: this.stringe.body.velocity.x, vy: this.stringe.body.velocity.y});
-      }
-
-      this.stringe.oldPosition = {
-        x: this.stringe.x,
-        y: this.stringe.y,
-        vx: this.stringe.body.velocity.x,
-        vy: this.stringe.body.velocity.y
-      }
-    }
-
-    if(this.innerrage){
-      
-      if(this.innerrage.body.velocity.x < 0){
-        this.innerrage.flipX = true;
-      } else if (this.innerrage.body.velocity.x > 0){
-        this.innerrage.flipX = false;
-      }
-
-      var x = this.innerrage.x;
-      var y = this.innerrage.y;
-      var vx = this.innerrage.body.velocity.x;
-      var vy = this.innerrage.body.velocity.y;
-
-      if(this.innerrage.oldPosition && (x !== this.innerrage.oldPosition.x || y != this.innerrage.oldPosition.y || 
-        vx !== this.innerrage.oldPosition.vx || vy !== this.innerrage.oldPosition.vy )){
-          this.socket.emit('innerrageMovement', {x: this.innerrage.x, y: this.innerrage.y, vx: this.innerrage.body.velocity.x, vy: this.innerrage.body.velocity.y});
-        }
-
-      this.innerrage.oldPosition = {
-        x: this.innerrage.x,
-        y: this.innerrage.y,
-        vx: this.innerrage.body.velocity.x,
-        vy: this.innerrage.body.velocity.y
-      }
-
-    }
-
-    if(this.jrreaper){
-      if(this.jrreaper.body.velocity.x < 0){
-        this.jrreaper.flipX = false;
-      } else if (this.jrreaper.body.velocity.x > 0){
-        this.jrreaper.flipX = true;
-      }
-
-      var x = this.jrreaper.x;
-      var y = this.jrreaper.y;
-      var vx = this.jrreaper.body.velocity.x;
-      var vy = this.jrreaper.body.velocity.y;
-
-      if(this.jrreaper.oldPosition && (x !== this.jrreaper.oldPosition.x || y !== this.jrreaper.oldPosition.y || 
-        vx !== this.jrreaper.oldPosition.vx || vy !== this.jrreaper.oldPosition.vy)){
-          this.socket.emit('jrreaperMovement', {x: this.jrreaper.x, y: this.jrreaper.y, vx: this.jrreaper.body.velocity.x, vy: this.jrreaper.body.velocity.y});
-      }
-
-      this.jrreaper.oldPosition = {
-        x: this.jrreaper.x,
-        y: this.jrreaper.y,
-        vx: this.jrreaper.body.velocity.x,
-        vy: this.jrreaper.body.velocity.y
-      }
-    }
   }
+}
 
+//Handle the collections of a dot
+function collectDot(player, star){
+  this.socket.emit('destroyDot', star.mapIndex)
+  star.destroy();
 }
 
 var game = new Phaser.Game({

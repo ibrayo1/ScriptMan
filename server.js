@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 var express = require('express');
 // This imports the account class from the Account.js file
 const { Account } = require(__dirname + '/public/js/account.js');
@@ -10,13 +11,13 @@ var dot = {
   y: 24
 };
 
-//We need to synchronize the dot map between servers and clients
-//To do this, We're gonna find all indexes in the map with and id of 7
-//And store their index in an array. This corresponds to the dotmap on the client
-var map = require('./public/assets/pacman_map_massive_2.json');
-//Get the first layer of the map
+//Require the map file so we can sync the dotmap
+var map = require('./public/assets/pacman-map1.json');
+
+//Get the map data
 map = map.layers[0].data;
 
+//Setup an array corresponding to the map dot data
 //For every 7, or "dot"
 var dotArray = [];
 for(var i = 0; i < map.length; i++){
@@ -24,11 +25,6 @@ for(var i = 0; i < map.length; i++){
     dotArray.push(1);
   }
 }
-
-var blackdragon = {x: 24, y: 24, vx: 100, vy: 100};
-var stringe = {x: 150, y: 150, vx: -100, vy: 100};
-var innerrage = {x: 200, y: 400, vx: 100, vy: -100};
-var jrreaper = {x: 430, y: 480, vx: -100, vy: -100};
 
 app.use(express.static(__dirname + '/public'));
  
@@ -56,26 +52,14 @@ io.on('connection', function (socket) {
     io.emit('scoreUpdate', players);
   });
 
-  // send the entire dotmap
-  socket.emit('dotMap', dotArray);
-
   // send the players object to the new player
   socket.emit('currentPlayers', players);
 
   // send the dot object to new player
   socket.emit('dotLocation', dot);
 
-  // send the draogn location to player
-  socket.emit('blackdragonLocation', blackdragon);
-
-  // send the stringe location to player
-  socket.emit('stringeLocation', stringe);
-
-  // send the inner rage enemy location to player
-  socket.emit('innerrageLocation', innerrage);
-
-  // sned the jr repear enemy location to player
-  socket.emit('jrreaperLocation', jrreaper);
+  // send the entire dotmap
+  socket.emit('dotMap', dotArray);
 
   // update all other players of the new player
   socket.broadcast.emit('newPlayer', players[socket.id]);
@@ -116,39 +100,13 @@ io.on('connection', function (socket) {
     io.emit('scoreUpdate', players);
   });
 
-  socket.on('blackdragonMovement', function (dragonLoc) {
-    blackdragon.x = dragonLoc.x;
-    blackdragon.y = dragonLoc.y;
-    blackdragon.vx = dragonLoc.vx;
-    blackdragon.vy = dragonLoc.vy;
-    socket.broadcast.emit('blackdragonMoved', blackdragon);
-  });
+  socket.on('destroyDot', function(index){
+    dotArray[index] = 0;
+    io.emit('removeDot', index);
 
-  socket.on('stringeMovement', function(stringeLoc){
-    stringe.x = stringeLoc.x;
-    stringe.y = stringeLoc.y;
-    stringe.vx = stringeLoc.vx;
-    stringe.vy = stringeLoc.vy;
-    socket.broadcast.emit('stringeMoved', stringe);
-  });
-
-  socket.on('innerrageMovement', function(innerrageLoc){
-    innerrage.x = innerrageLoc.x;
-    innerrage.y = innerrageLoc.y;
-    innerrage.vx = innerrageLoc.vx;
-    innerrage.vy = innerrageLoc.vy;
-    socket.broadcast.emit('innerrageMoved', innerrage);
-  });
-
-  socket.on('jrreaperMovement', function(jrreaperLoc){
-    jrreaper.x = jrreaperLoc.x;
-    jrreaper.y = jrreaperLoc.y;
-    jrreaper.vx = jrreaperLoc.vx;
-    jrreaper.vy = jrreaperLoc.vy;
-    socket.broadcast.emit('jrreaperMoved', jrreaper);
   });
 });
 
 server.listen(3000, function () {
-  console.log("Listening on port 3000");
+  console.log(`Listening on ${server.address().port}`);
 });
