@@ -220,6 +220,14 @@ var GameScene = {
           repeat: -1
       });
       
+      // create the dragon fly animation
+      this.anims.create({
+        key: 'dragon-fly',
+        frames: this.anims.generateFrameNumbers('blackdragon', {start: 0, end: 4}),
+        frameRate: 6,
+        repeat: -1
+      });
+
       var self = this;
       this.socket = io();
       this.socket.emit('playerName', {username: usrname});
@@ -289,9 +297,13 @@ var GameScene = {
 
       this.socket.on('spawn_red_ghost', function(position){
           
-          self.red_ghost = self.physics.add.sprite(self.dotMap[3].x,self.dotMap[3].y,'red_ghost');
-          self.red_ghost.setCircle(8,8,8);
+          self.red_ghost = self.physics.add.sprite(self.dotMap[3].x,self.dotMap[3].y, 'blackdragon');
+          self.red_ghost.displayHeight = 60;
+          self.red_ghost.displayWidth = 60;
+          self.red_ghost.setCircle(10, 30, 40);
           self.red_ghost.setCollideWorldBounds(true);
+
+          self.red_ghost.play('dragon-fly');
 
           self.physics.add.collider(self.red_ghost, worldMap);
           self.last_red_ghost_pos = position;
@@ -328,7 +340,7 @@ var GameScene = {
                 self.scoreMap.get(otherPlayer.playerId).destroy(); // destroy text
                 self.scoreMap.delete(otherPlayer.playerId); // delete player's score from the map of player scores
                 otherPlayer.destroy(); // destroy the player object
-                this.scene.launch('TitleScene');
+                this.scene.launch('NameInputScene');
             }
           });
       });
@@ -346,7 +358,13 @@ var GameScene = {
       this.socket.on('red_ghost_controller', function(){
         console.log("This is the controller")
         self.is_controller = true;
-      })
+      });
+
+      this.socket.on('new_red_ghost_controller', function(playerInfo){
+        if(playerInfo.playerId == self.socket.id){
+          self.is_controller = true;
+        }
+      });
 
       // listens for the the scores for all the players and updates them
       this.socket.on('scoreUpdate', function (players) {
@@ -360,11 +378,14 @@ var GameScene = {
           }
         });
       });
+
       this.socket.on("red_ghost_pos", function(pos){
         console.log(self);
         self.red_ghost.setX(pos.x);
         self.red_ghost.setY(pos.y);
-      })
+        self.red_ghost.flipX = pos.flip;
+      });
+
       // define cursors as standard arrow keys
       cursors = this.input.keyboard.createCursorKeys();
   },
@@ -386,9 +407,13 @@ var GameScene = {
       if(direction == 0){
         this.red_ghost.setVelocityY(0);
         this.red_ghost.setVelocityX(170);
+        this.flipX = true;
+        this.red_ghost.flipX = this.flipX;
       }else if(direction == 1){
         this.red_ghost.setVelocityY(0);
         this.red_ghost.setVelocityX(-170);
+        this.flipX = false;
+        this.red_ghost.flipX = this.flipX;
       }else if(direction == 2){
         this.red_ghost.setVelocityX(0);
         this.red_ghost.setVelocityY(170);
@@ -403,7 +428,7 @@ var GameScene = {
 
     if(this.is_controller){
       //Send the ghost pos
-      var ghostPos = {x: this.red_ghost.x, y: this.red_ghost.y};
+      var ghostPos = {x: this.red_ghost.x, y: this.red_ghost.y, flip: this.flipX};
       this.socket.emit('red_ghost_pos', ghostPos);
     }
 
@@ -460,7 +485,7 @@ var game = new Phaser.Game({
   physics: {
     default: 'arcade',
     arcade: {
-      debug: true,
+      debug: false,
       gravity: { y: 0 }
     }
   },

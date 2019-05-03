@@ -6,6 +6,7 @@ var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 var players = {};
+var socketIdArray = [];
 var dot = {
   x: 24,
   y: 24
@@ -20,7 +21,8 @@ var map = require('./public/assets/pacman-map1.json');
 //holds the position of the red ghost this tick
 var red_ghost_pos = {
   x: 1,
-  y: 1
+  y: 1,
+  flip: false
 }
 var blue_ghost_pos = {
   x: 30,
@@ -64,6 +66,7 @@ io.on('connection', function (socket) {
     '', // username is intialized to empty string
   );
 
+  socketIdArray.push(socket.id);
     
   // sets the name of the player
   socket.on('playerName', function(nameData){
@@ -106,6 +109,17 @@ io.on('connection', function (socket) {
   // when a player disconnects, remove them from our players object
   socket.on('disconnect', function () {
     console.log('user disconnected');
+    // remove the socket id from array
+    var index = socketIdArray.indexOf(socket.id);
+    if (index > -1) {
+      socketIdArray.splice(index, 1);
+    }
+
+    // set a random player as the new controller of the ghost
+    var socketid = socketIdArray[Math.floor(Math.random() * socketIdArray.length)];
+    var player = players[socketid];
+    socket.broadcast.emit('new_red_ghost_controller', player);
+
     // remove this player from our players object
     delete players[socket.id];
     // emit a message to all players to remove this player
@@ -129,6 +143,7 @@ io.on('connection', function (socket) {
   socket.on('red_ghost_pos', function (pos){
     red_ghost_pos.x = pos.x;
     red_ghost_pos.y = pos.y;
+    red_ghost_pos.flip = pos.flip;
     socket.broadcast.emit('red_ghost_pos', red_ghost_pos);
   });
 
