@@ -418,9 +418,7 @@ var GameScene = {
         if(self.jrreaper) self.jrreaper.destroy();
         self.jrreaper = self.physics.add.sprite(loc.x, loc.y, 'jrreaper');
 
-        //self.jrreaper.displayHeight = 55;
-        //self.jrreaper.displayWidth = 55;
-        // self.jrreaper.setCircle(1, 1, 1); ill take care of this later
+        //self.jrreaper.setCircle(1, 1, 1); ill take care of this later
         self.jrreaper.play('jrreaper-anim');
 
         self.jrreaper.body.setVelocity(loc.vx, loc.vy).setBounce(1, 1).setCollideWorldBounds(true);
