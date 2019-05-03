@@ -155,12 +155,26 @@ var GameScene = {
       this.load.spritesheet('stringe', 'assets/Stringe.png', {frameWidth: 50, frameHeight: 53});
       this.load.spritesheet('innerrage', 'assets/InnerRage.png', {frameWidth: 139, frameHeight: 181});
       this.load.spritesheet('jrreaper', 'assets/JrReaper.png', {frameWidth: 42, frameHeight: 41});
+      this.load.spritesheet('red_ghost', 'assets/red_ghost.png', {frameWidth: 32, frameHeight: 32});
+
       this.load.tilemapTiledJSON('map-with-dots', 'assets/pacman-map1.json');
   },
 
   create: function create(){
       // destroys the TitleScene
       this.scene.remove('NameInputScene');
+
+      //Is this client controlling the ghosts?
+      this.is_controller = false;
+
+      this.red_ghost_stuck = false;
+
+      const waitText = this.add.text(200,50, "Waiting for 4 players");
+      waitText.setDepth(1000);
+      waitText.setBackgroundColor("#000000")
+      waitText.setFontSize(24);
+      this.scene.pause();
+
 
       // this resets the world bound collisions
       this.physics.world.setBounds(0, 0, 448, 496, true, true, true, true);
@@ -205,40 +219,6 @@ var GameScene = {
           frameRate: 15,
           repeat: -1
       });
-
-
-      // dragon enemy animation
-      this.anims.create({
-        key: 'dragon-fly',
-        frames: this.anims.generateFrameNumbers('blackdragon', {start: 0, end: 4}),
-        frameRate: 6,
-        repeat: -1
-      });
-
-      
-      // stringe enemy animation
-      this.anims.create({
-        key: 'stringe-fly',
-        frames: this.anims.generateFrameNumbers('stringe', {start: 0, end: 1}),
-        frameRate: 6,
-        repeat: -1
-      });
-
-      // inner rage standing enemy animation
-      this.anims.create({
-        key: 'innerrage-stand',
-        frames: this.anims.generateFrameNumbers('innerrage', {start: 0, end: 7}),
-        frameRate: 6,
-        repeat: -1
-      });
-
-      // Jr Reaper enemy animation
-      this.anims.create({
-        key: 'jrreaper-anim',
-        frames: this.anims.generateFrameNumbers('jrreaper', {start: 0, end: 7}),
-        frameRate: 6,
-        repeat: -1
-      });
       
       var self = this;
       this.socket = io();
@@ -267,6 +247,7 @@ var GameScene = {
               self.physics.add.collider(self.pacman, worldMap);
           } else {
               self.otherPlayer = self.physics.add.sprite(players[id].x, players[id].y, 'pacman');
+              self.physics.add.overlap(self.otherPlayer, self.dots, collectDot, null, this);
               self.otherPlayer.setCircle(8, 8, 8);
               self.otherPlayer.setCollideWorldBounds(true);
               
@@ -289,16 +270,32 @@ var GameScene = {
 
       //Listen for the incoming dotmap
       this.socket.on('dotMap', function (dotArray) {
+        console.log("Got dotmap")
+        console.log(dotArray);
         for(var i = 0; i < dotArray.length; i++){
+          if(dotArray[i] == 1){
             var dot = self.physics.add.image(self.dotMap[i].x, self.dotMap[i].y, 'dot');
             dot.mapIndex = i;
             self.dots.add(dot);
+          }
         }
       });
 
-      //Listens for if we need to remove a dot
-      this.socket.on('removeDot', function (i){
-        self.dots.getChildren()[i].destroy();
+      this.socket.on('startGame', function(){
+        console.log("fuck");
+        waitText.destroy();
+        self.scene.resume();
+      })
+
+      this.socket.on('spawn_red_ghost', function(position){
+          
+          self.red_ghost = self.physics.add.sprite(self.dotMap[3].x,self.dotMap[3].y,'red_ghost');
+          self.red_ghost.setCircle(8,8,8);
+          self.red_ghost.setCollideWorldBounds(true);
+
+          self.physics.add.collider(self.red_ghost, worldMap);
+          self.last_red_ghost_pos = position;
+          self.red_ghost.setVelocityX(170);
       })
 
       // checks for if a new players added onto server
@@ -306,6 +303,8 @@ var GameScene = {
         self.otherPlayer = self.physics.add.sprite(playerInfo.x, playerInfo.y, 'pacman');
         self.otherPlayer.setCircle(8, 8, 8);
         self.otherPlayer.setCollideWorldBounds(true);
+
+        self.physics.add.overlap(self.otherPlayer, self.dots, collectDot, null, this);
         
         // play the animation
         self.otherPlayer.play('munch');
@@ -344,14 +343,10 @@ var GameScene = {
           });
       });
 
-      this.socket.on('dotLocation', function (dotLocation) {
-          if (self.dot) self.dot.destroy();
-          self.dot = self.physics.add.image(dotLocation.x, dotLocation.y, 'Hallenbeck');
-          var rand = self.dotMap[Math.floor(Math.random() * self.dotMap.length)];
-          self.physics.add.overlap(self.pacman, self.dot, function () {
-            this.socket.emit('dotCollected', {x: rand.x, y: rand.y});
-          }, null, self);
-      });
+      this.socket.on('red_ghost_controller', function(){
+        console.log("This is the controller")
+        self.is_controller = true;
+      })
 
       // listens for the the scores for all the players and updates them
       this.socket.on('scoreUpdate', function (players) {
@@ -365,12 +360,54 @@ var GameScene = {
           }
         });
       });
-
+      this.socket.on("red_ghost_pos", function(pos){
+        console.log(self);
+        self.red_ghost.setX(pos.x);
+        self.red_ghost.setY(pos.y);
+      })
       // define cursors as standard arrow keys
       cursors = this.input.keyboard.createCursorKeys();
   },
 
   update: function update(){
+    if( 
+        this.red_ghost &&
+        this.last_red_ghost_pos.x == this.red_ghost.x && 
+        this.last_red_ghost_pos.y == this.red_ghost.y && 
+        this.is_controller == true
+      ){
+      //Make it so we can't just go back on 
+      direction = Math.floor((Math.random() * 4));
+      while(direction == this.last_red_ghost_direction){
+        direction = Math.floor((Math.random() * 4));
+      }
+
+
+      if(direction == 0){
+        this.red_ghost.setVelocityY(0);
+        this.red_ghost.setVelocityX(170);
+      }else if(direction == 1){
+        this.red_ghost.setVelocityY(0);
+        this.red_ghost.setVelocityX(-170);
+      }else if(direction == 2){
+        this.red_ghost.setVelocityX(0);
+        this.red_ghost.setVelocityY(170);
+      }else{
+        this.red_ghost.setVelocityX(0);
+        this.red_ghost.setVelocityY(-170);
+      }
+    }
+
+    this.last_red_ghost_pos.x = this.red_ghost.x;
+    this.last_red_ghost_pos.y = this.red_ghost.y;
+
+    if(this.is_controller){
+      //Send the ghost pos
+      var ghostPos = {x: this.red_ghost.x, y: this.red_ghost.y};
+      this.socket.emit('red_ghost_pos', ghostPos);
+    }
+
+
     if(this.pacman){
       this.physics.add.overlap(this.pacman, this.dots, collectDot, null, this);
       // Horizontal movement
@@ -410,7 +447,8 @@ var GameScene = {
 
 //Handle the collections of a dot
 function collectDot(player, star){
-  this.socket.emit('destroyDot', star.mapIndex)
+  if(this.socket)
+    this.socket.emit('dotCollected', star.mapIndex)
   star.destroy();
 }
 
@@ -422,7 +460,7 @@ var game = new Phaser.Game({
   physics: {
     default: 'arcade',
     arcade: {
-      debug: false,
+      debug: true,
       gravity: { y: 0 }
     }
   },
