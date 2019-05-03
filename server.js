@@ -10,6 +10,34 @@ var dot = {
   x: 24,
   y: 24
 };
+var numPlayers = 0;
+
+const DEBUG_PLAYERS_TO_START = 1;
+
+//Require the map file so we can sync the dotmap
+var map = require('./public/assets/pacman-map1.json');
+
+//holds the position of the red ghost this tick
+var red_ghost_pos = {
+  x: 1,
+  y: 1
+}
+var blue_ghost_pos = {
+  x: 30,
+  y: 30
+}
+
+//Get the map data
+map = map.layers[0].data;
+
+//Setup an array corresponding to the map dot data
+//For every 7, or "dot"
+var dotArray = [];
+for(var i = 0; i < map.length; i++){
+  if(map[i] == 7){
+    dotArray.push(1);
+  }
+}
 
 var blackdragon = {x: 24, y: 24, vx: 100, vy: 100};
 var stringe = {x: 150, y: 150, vx: -100, vy: 100};
@@ -23,6 +51,7 @@ app.get('/', function (req, res) {
 });
 
 io.on('connection', function (socket) {
+  numPlayers++;
   console.log('a user connected');
   // create a new player and add it to our players object
   console.log('their socket.id: ' + socket.id);
@@ -35,6 +64,7 @@ io.on('connection', function (socket) {
     '', // username is intialized to empty string
   );
 
+    
   // sets the name of the player
   socket.on('playerName', function(nameData){
     players[socket.id].username = nameData.username;
@@ -42,23 +72,30 @@ io.on('connection', function (socket) {
     io.emit('scoreUpdate', players);
   });
 
+  if(numPlayers >= DEBUG_PLAYERS_TO_START){
+    console.log("Starting game")
+    io.emit('startGame');
+    socket.broadcast.emit('startGame');
+  }
+
   // send the players object to the new player
   socket.emit('currentPlayers', players);
 
   // send the dot object to new player
   socket.emit('dotLocation', dot);
 
-  // send the draogn location to player
-  socket.emit('blackdragonLocation', blackdragon);
+  // send the entire dotmap
+  socket.emit('dotMap', dotArray);
 
-  // send the stringe location to player
-  socket.emit('stringeLocation', stringe);
+  if(numPlayers == 1){
+    // tell the game to spawn a red ghost
+    console.log("user is first user, telling them they are ghost controller")
+    socket.emit('red_ghost_controller', red_ghost_pos); 
+  }
 
-  // send the inner rage enemy location to player
-  socket.emit('innerrageLocation', innerrage);
+  socket.emit("spawn_red_ghost", red_ghost_pos);
+  socket.emit("spawn_blue_ghost", blue_ghost_pos);
 
-  // sned the jr repear enemy location to player
-  socket.emit('jrreaperLocation', jrreaper);
 
   // update all other players of the new player
   socket.broadcast.emit('newPlayer', players[socket.id]);
@@ -73,7 +110,9 @@ io.on('connection', function (socket) {
     delete players[socket.id];
     // emit a message to all players to remove this player
     io.emit('disconnect', socket.id);
+    numPlayers--;
   });
+
 
   // when a player moves, update the player data
   socket.on('playerMovement', function (movementData) {
@@ -87,50 +126,33 @@ io.on('connection', function (socket) {
     socket.broadcast.emit('playerMoved', players[socket.id]);
   });
 
-  socket.on('dotCollected', function (dotLoc) {
+  socket.on('red_ghost_pos', function (pos){
+    red_ghost_pos.x = pos.x;
+    red_ghost_pos.y = pos.y;
+    socket.broadcast.emit('red_ghost_pos', red_ghost_pos);
+  });
+
+  socket.on('blue_ghost_pos', function (pos){
+    blue_ghost_pos.x = pos.x;
+    blue_ghost_pos.y = pos.y;
+    socket.broadcast.emit('blue_ghost_pos', red_ghost_pos);
+  });
+
+  socket.on('dotCollected', function (index) {
+
+    //Nullify it's value in our dot array
+    dotArray[index] = 0;
+
     players[socket.id].score += 342;
 
-    console.log(players[socket.id].score); // for debugging purposes
-    
-    dot.x = dotLoc.x;
-    dot.y = dotLoc.y;
-    io.emit('dotLocation', dot);
     // emit a message to all player that updated his score
     io.emit('scoreUpdate', players);
   });
 
-  socket.on('blackdragonMovement', function (dragonLoc) {
-    blackdragon.x = dragonLoc.x;
-    blackdragon.y = dragonLoc.y;
-    blackdragon.vx = dragonLoc.vx;
-    blackdragon.vy = dragonLoc.vy;
-    socket.broadcast.emit('blackdragonMoved', blackdragon);
+  socket.on('destroyDot', function(index){
+    console.log(index);
+    socket.broadcast.emit('removeDot', index);
   });
-
-  socket.on('stringeMovement', function(stringeLoc){
-    stringe.x = stringeLoc.x;
-    stringe.y = stringeLoc.y;
-    stringe.vx = stringeLoc.vx;
-    stringe.vy = stringeLoc.vy;
-    socket.broadcast.emit('stringeMoved', stringe);
-  });
-
-  socket.on('innerrageMovement', function(innerrageLoc){
-    innerrage.x = innerrageLoc.x;
-    innerrage.y = innerrageLoc.y;
-    innerrage.vx = innerrageLoc.vx;
-    innerrage.vy = innerrageLoc.vy;
-    socket.broadcast.emit('innerrageMoved', innerrage);
-  });
-
-  socket.on('jrreaperMovement', function(jrreaperLoc){
-    jrreaper.x = jrreaperLoc.x;
-    jrreaper.y = jrreaperLoc.y;
-    jrreaper.vx = jrreaperLoc.vx;
-    jrreaper.vy = jrreaperLoc.vy;
-    socket.broadcast.emit('jrreaperMoved', jrreaper);
-  });
-
 });
 
 server.listen(3000, function () {
