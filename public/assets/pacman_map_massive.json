@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 {
 	"height": 155,
 	"layers": [{
@@ -33,6 +34,8 @@
 	"version": 1.2,
 	"width": 140
 =======
+=======
+>>>>>>> dev
 {
 	"height": 155,
 	"layers": [{
@@ -66,5 +69,8 @@
 	"tilewidth": 16,
 	"version": 1.2,
 	"width": 140
+<<<<<<< HEAD
 >>>>>>> 37b87cfc0567237ee6e8b7e7d591c2a70ee96b81
+=======
+>>>>>>> dev
 }

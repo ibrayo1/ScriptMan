@@ -39,6 +39,11 @@ for(var i = 0; i < map.length; i++){
   }
 }
 
+var blackdragon = {x: 24, y: 24, vx: 100, vy: 100};
+var stringe = {x: 150, y: 150, vx: -100, vy: 100};
+var innerrage = {x: 200, y: 400, vx: 100, vy: -100};
+var jrreaper = {x: 430, y: 480, vx: -100, vy: -100};
+
 app.use(express.static(__dirname + '/public'));
  
 app.get('/', function (req, res) {
