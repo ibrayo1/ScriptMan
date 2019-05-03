@@ -363,6 +363,8 @@ var GameScene = {
       this.socket.on('new_red_ghost_controller', function(playerInfo){
         if(playerInfo.playerId == self.socket.id){
           self.is_controller = true;
+        } else {
+          self.is_controller = false;
         }
       });
 

@@ -109,6 +109,12 @@ io.on('connection', function (socket) {
   // when a player disconnects, remove them from our players object
   socket.on('disconnect', function () {
     console.log('user disconnected');
+    // remove this player from our players object
+    delete players[socket.id];
+    // emit a message to all players to remove this player
+    io.emit('disconnect', socket.id);
+    numPlayers--;
+
     // remove the socket id from array
     var index = socketIdArray.indexOf(socket.id);
     if (index > -1) {
@@ -117,14 +123,7 @@ io.on('connection', function (socket) {
 
     // set a random player as the new controller of the ghost
     var socketid = socketIdArray[Math.floor(Math.random() * socketIdArray.length)];
-    var player = players[socketid];
-    socket.broadcast.emit('new_red_ghost_controller', player);
-
-    // remove this player from our players object
-    delete players[socket.id];
-    // emit a message to all players to remove this player
-    io.emit('disconnect', socket.id);
-    numPlayers--;
+    socket.broadcast.emit('new_red_ghost_controller', players[socketid]);
   });
 
 
