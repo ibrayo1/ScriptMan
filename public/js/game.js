@@ -167,9 +167,6 @@ var GameScene = {
       //Is this client controlling the ghosts?
       this.is_controller = false;
 
-      //this.blackdragon_stuck = false;
-      //this.stringe_stuck = false;
-
       const waitText = this.add.text(200,50, "Waiting for 4 players");
       waitText.setDepth(1000);
       waitText.setBackgroundColor("#000000")
@@ -361,6 +358,16 @@ var GameScene = {
         self.innerrage.setVelocityX(170);
       });
 
+      this.socket.on('spawn_jrreaper', function(position){
+        self.jrreaper = self.physics.add.sprite(position.x, position.y, 'jrreaper');
+        self.jrreaper.setCircle(8, 15, 15);
+        self.jrreaper.play('jrreaper-anim');
+        
+        self.physics.add.collider(self.jrreaper, worldMap);
+        self.last_jrreaper_pos = position;
+        self.jrreaper.setVelocityX(-170);
+      });
+
       // checks for if a new players added onto server
       this.socket.on('newPlayer', function (playerInfo) {
         self.otherPlayer = self.physics.add.sprite(playerInfo.x, playerInfo.y, 'pacman');
@@ -451,6 +458,12 @@ var GameScene = {
         self.innerrage.flipX = pos.flip;
       });
 
+      this.socket.on("jrreaper_pos", function(pos){
+        self.jrreaper.setX(pos.x);
+        self.jrreaper.setY(pos.y);
+        self.jrreaper.flipX = pos.flip;
+      });
+
       // define cursors as standard arrow keys
       cursors = this.input.keyboard.createCursorKeys();
   },
@@ -536,6 +549,31 @@ var GameScene = {
           this.innerrage.setVelocityY(-170);
         }
       }
+      if(this.jrreaper && this.last_jrreaper_pos.x == this.jrreaper.x && this.last_jrreaper_pos.y == this.jrreaper.y){
+        //Make it so we can't just go back on 
+        direction = Math.floor((Math.random() * 4));
+        while(direction == this.last_jrreaper_direction){
+          direction = Math.floor((Math.random() * 4));
+        }
+
+        if(direction == 0){
+          this.jrreaper.setVelocityY(0);
+          this.jrreaper.setVelocityX(170);
+          this.jrreaperflipX = true;
+          this.jrreaper.flipX = this.jrreaperflipX;
+        }else if(direction == 1){
+          this.jrreaper.setVelocityY(0);
+          this.jrreaper.setVelocityX(-170);
+          this.jrreaperflipX = false;
+          this.jrreaper.flipX = this.jrreaperflipX;
+        }else if(direction == 2){
+          this.jrreaper.setVelocityX(0);
+          this.jrreaper.setVelocityY(170);
+        }else{
+          this.jrreaper.setVelocityX(0);
+          this.jrreaper.setVelocityY(-170);
+        }
+      }
     }
 
     this.last_blackdragon_pos.x = this.blackdragon.x;
@@ -544,6 +582,8 @@ var GameScene = {
     this.last_stringe_pos.y = this.stringe.y;
     this.last_innerrage_pos.x = this.innerrage.x;
     this.last_innerrage_pos.y = this.innerrage.y;
+    this.last_jrreaper_pos.x = this.jrreaper.x;
+    this.last_jrreaper_pos.y = this.jrreaper.y;
 
     if(this.is_controller){
       //Send the ghost pos
@@ -555,6 +595,9 @@ var GameScene = {
 
       var innerragePos = {x: this.innerrage.x, y: this.innerrage.y, flip: this.innerrageflipX};
       this.socket.emit('innerrage_pos', innerragePos);
+
+      var jrreaperPos = {x: this.jrreaper.x, y: this.jrreaper.y, flip: this.jrreaperflipX};
+      this.socket.emit('jrreaper_pos', jrreaperPos);
     }
 
 

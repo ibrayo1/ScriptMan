@@ -22,7 +22,7 @@ var map = require('./public/assets/pacman-map1.json');
 var blackdragon_pos = { x: 16, y: 16, flip: false };
 var stringe_pos = { x: 424, y: 24, flip: false };
 var innerrage_pos = { x: 24, y: 472, flip: false };
-var jrreaper = { x: 424, y: 472, flip: false };
+var jrreaper_pos = { x: 424, y: 472, flip: false };
 
 //Get the map data
 map = map.layers[0].data;
@@ -89,6 +89,7 @@ io.on('connection', function (socket) {
   socket.emit("spawn_blackdragon", blackdragon_pos);
   socket.emit("spawn_stringe", stringe_pos);
   socket.emit("spawn_innerrage", innerrage_pos);
+  socket.emit("spawn_jrreaper", jrreaper_pos);
 
 
   // update all other players of the new player
@@ -115,6 +116,8 @@ io.on('connection', function (socket) {
     // set a random player as the new controller of the ghost
     var socketid = socketIdArray[Math.floor(Math.random() * socketIdArray.length)];
     socket.broadcast.emit('new_enemies_controller', players[socketid]);
+
+    console.log('the new enemies controller is ' + players[socketid].username);
   });
 
 
@@ -149,6 +152,13 @@ io.on('connection', function (socket) {
     innerrage_pos.y = pos.y;
     innerrage_pos.flip = pos.flip;
     socket.broadcast.emit('innerrage_pos', innerrage_pos);
+  });
+
+  socket.on('jrreaper_pos', function(pos){
+    jrreaper_pos.x = pos.x;
+    jrreaper_pos.y = pos.y;
+    jrreaper_pos.flip = pos.flip;
+    socket.broadcast.emit('jrreaper_pos', jrreaper_pos);
   });
 
   socket.on('dotCollected', function (index) {
