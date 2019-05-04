@@ -117,7 +117,9 @@ io.on('connection', function (socket) {
     var socketid = socketIdArray[Math.floor(Math.random() * socketIdArray.length)];
     socket.broadcast.emit('new_enemies_controller', players[socketid]);
 
-    console.log('the new enemies controller is ' + players[socketid].username);
+    if(socketIdArray.length !== 0){
+      console.log('the new enemies controller is ' + players[socketid].username);
+    }
   });
 
 
