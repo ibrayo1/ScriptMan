@@ -21,8 +21,8 @@ var map = require('./public/assets/pacman-map1.json');
 //holds the position of the dragon this tick
 var blackdragon_pos = { x: 16, y: 16, flip: false };
 var stringe_pos = { x: 424, y: 24, flip: false };
-var innerrage_pos = { x: 0, y: 0, flip: false };
-var jrreaper = { x: 0, y: 0, flip: false };
+var innerrage_pos = { x: 24, y: 472, flip: false };
+var jrreaper = { x: 424, y: 472, flip: false };
 
 //Get the map data
 map = map.layers[0].data;
@@ -35,11 +35,6 @@ for(var i = 0; i < map.length; i++){
     dotArray.push(1);
   }
 }
-
-// var blackdragon = {x: 24, y: 24, vx: 100, vy: 100};
-// var stringe = {x: 150, y: 150, vx: -100, vy: 100};
-// var innerrage = {x: 200, y: 400, vx: 100, vy: -100};
-// var jrreaper = {x: 430, y: 480, vx: -100, vy: -100};
 
 app.use(express.static(__dirname + '/public'));
  
@@ -87,12 +82,13 @@ io.on('connection', function (socket) {
 
   if(numPlayers == 1){
     // tell the game to spawn a red ghost
-    console.log("user is first user, telling them they are dragon controller")
-    socket.emit('blackdragon_controller', blackdragon_pos); 
+    console.log("user is first user, telling them they are enemy controller")
+    socket.emit('enemies_controller', blackdragon_pos); 
   }
 
   socket.emit("spawn_blackdragon", blackdragon_pos);
   socket.emit("spawn_stringe", stringe_pos);
+  socket.emit("spawn_innerrage", innerrage_pos);
 
 
   // update all other players of the new player
@@ -118,7 +114,7 @@ io.on('connection', function (socket) {
 
     // set a random player as the new controller of the ghost
     var socketid = socketIdArray[Math.floor(Math.random() * socketIdArray.length)];
-    socket.broadcast.emit('new_blackdragon_controller', players[socketid]);
+    socket.broadcast.emit('new_enemies_controller', players[socketid]);
   });
 
 
@@ -146,6 +142,13 @@ io.on('connection', function (socket) {
     stringe_pos.y = pos.y;
     stringe_pos.flip = pos.flip;
     socket.broadcast.emit('stringe_pos', stringe_pos);
+  });
+
+  socket.on('innerrage_pos', function(pos){
+    innerrage_pos.x = pos.x;
+    innerrage_pos.y = pos.y;
+    innerrage_pos.flip = pos.flip;
+    socket.broadcast.emit('innerrage_pos', innerrage_pos);
   });
 
   socket.on('dotCollected', function (index) {

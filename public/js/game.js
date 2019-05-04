@@ -167,8 +167,8 @@ var GameScene = {
       //Is this client controlling the ghosts?
       this.is_controller = false;
 
-      this.blackdragon_stuck = false;
-      this.stringe_stuck = false;
+      //this.blackdragon_stuck = false;
+      //this.stringe_stuck = false;
 
       const waitText = this.add.text(200,50, "Waiting for 4 players");
       waitText.setDepth(1000);
@@ -348,6 +348,19 @@ var GameScene = {
         self.stringe.setVelocityX(-170);
       });
 
+      this.socket.on('spawn_innerrage', function(position){
+        self.innerrage = self.physics.add.sprite(position.x, position.y, 'innerrage');
+        self.innerrage.displayHeight = 60;
+        self.innerrage.displayWidth = 60;
+        self.innerrage.setCircle(17, 60, 93);
+
+        self.innerrage.play('innerrage-stand');
+
+        self.physics.add.collider(self.innerrage, worldMap);
+        self.last_innerrage_pos = position;
+        self.innerrage.setVelocityX(170);
+      });
+
       // checks for if a new players added onto server
       this.socket.on('newPlayer', function (playerInfo) {
         self.otherPlayer = self.physics.add.sprite(playerInfo.x, playerInfo.y, 'pacman');
@@ -393,12 +406,12 @@ var GameScene = {
           });
       });
 
-      this.socket.on('blackdragon_controller', function(){
+      this.socket.on('enemies_controller', function(){
         console.log("This is the controller")
         self.is_controller = true;
       });
 
-      this.socket.on('new_blackdragon_controller', function(playerInfo){
+      this.socket.on('new_enemies_controller', function(playerInfo){
         if(playerInfo.playerId == self.socket.id){
           self.is_controller = true;
         } else {
@@ -430,6 +443,12 @@ var GameScene = {
         self.stringe.setX(pos.x);
         self.stringe.setY(pos.y);
         self.stringe.flipX = pos.flip;
+      });
+
+      this.socket.on("innerrage_pos", function(pos){
+        self.innerrage.setX(pos.x);
+        self.innerrage.setY(pos.y);
+        self.innerrage.flipX = pos.flip;
       });
 
       // define cursors as standard arrow keys
@@ -492,12 +511,39 @@ var GameScene = {
           this.stringe.setVelocityY(-170);
         }
       }
+      if(this.innerrage && this.last_innerrage_pos.x == this.innerrage.x && this.last_innerrage_pos.y == this.innerrage.y){
+        //Make it so we can't just go back on 
+        direction = Math.floor((Math.random() * 4));
+        while(direction == this.last_innerrage_direction){
+          direction = Math.floor((Math.random() * 4));
+        }
+
+        if(direction == 0){
+          this.innerrage.setVelocityY(0);
+          this.innerrage.setVelocityX(170);
+          this.innerrageflipX = false;
+          this.innerrage.flipX = this.innerrageflipX;
+        }else if(direction == 1){
+          this.innerrage.setVelocityY(0);
+          this.innerrage.setVelocityX(-170);
+          this.innerrageflipX = true;
+          this.innerrage.flipX = this.innerrageflipX;
+        }else if(direction == 2){
+          this.innerrage.setVelocityX(0);
+          this.innerrage.setVelocityY(170);
+        }else{
+          this.innerrage.setVelocityX(0);
+          this.innerrage.setVelocityY(-170);
+        }
+      }
     }
 
     this.last_blackdragon_pos.x = this.blackdragon.x;
     this.last_blackdragon_pos.y = this.blackdragon.y;
     this.last_stringe_pos.x = this.stringe.x;
     this.last_stringe_pos.y = this.stringe.y;
+    this.last_innerrage_pos.x = this.innerrage.x;
+    this.last_innerrage_pos.y = this.innerrage.y;
 
     if(this.is_controller){
       //Send the ghost pos
@@ -506,6 +552,9 @@ var GameScene = {
 
       var stringePos = {x: this.stringe.x, y: this.stringe.y, flip: this.stringeflipX};
       this.socket.emit('stringe_pos', stringePos);
+
+      var innerragePos = {x: this.innerrage.x, y: this.innerrage.y, flip: this.innerrageflipX};
+      this.socket.emit('innerrage_pos', innerragePos);
     }
 
 
@@ -561,7 +610,7 @@ var game = new Phaser.Game({
   physics: {
     default: 'arcade',
     arcade: {
-      debug: false,
+      debug: true,
       gravity: { y: 0 }
     }
   },
