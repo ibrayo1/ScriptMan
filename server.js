@@ -144,6 +144,7 @@ io.on('connection', function (socket) {
   socket.on('stringe_pos', function (pos){
     stringe_pos.x = pos.x;
     stringe_pos.y = pos.y;
+    stringe_pos.flip = pos.flip;
     socket.broadcast.emit('stringe_pos', stringe_pos);
   });
 

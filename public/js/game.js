@@ -168,6 +168,7 @@ var GameScene = {
       this.is_controller = false;
 
       this.blackdragon_stuck = false;
+      this.stringe_stuck = false;
 
       const waitText = this.add.text(200,50, "Waiting for 4 players");
       waitText.setDepth(1000);
@@ -224,6 +225,30 @@ var GameScene = {
       this.anims.create({
         key: 'dragon-fly',
         frames: this.anims.generateFrameNumbers('blackdragon', {start: 0, end: 4}),
+        frameRate: 6,
+        repeat: -1
+      });
+
+      // stringe enemy animation
+      this.anims.create({
+        key: 'stringe-fly',
+        frames: this.anims.generateFrameNumbers('stringe', {start: 0, end: 1}),
+        frameRate: 6,
+        repeat: -1
+      });
+
+      // inner rage standing enemy animation
+      this.anims.create({
+        key: 'innerrage-stand',
+        frames: this.anims.generateFrameNumbers('innerrage', {start: 0, end: 7}),
+        frameRate: 6,
+        repeat: -1
+      });
+
+      // Jr Reaper enemy animation
+      this.anims.create({
+        key: 'jrreaper-anim',
+        frames: this.anims.generateFrameNumbers('jrreaper', {start: 0, end: 7}),
         frameRate: 6,
         repeat: -1
       });
@@ -296,7 +321,6 @@ var GameScene = {
       })
 
       this.socket.on('spawn_blackdragon', function(position){
-          
           self.blackdragon = self.physics.add.sprite(position.x, position.y, 'blackdragon');
           self.blackdragon.displayHeight = 60;
           self.blackdragon.displayWidth = 60;
@@ -308,7 +332,21 @@ var GameScene = {
           self.physics.add.collider(self.blackdragon, worldMap);
           self.last_blackdragon_pos = position;
           self.blackdragon.setVelocityX(170);
-      })
+      });
+
+      this.socket.on('spawn_stringe', function(position){
+        self.stringe = self.physics.add.sprite(position.x, position.y, 'stringe');
+        self.stringe.displayHeight = 50;
+        self.stringe.displayWidth = 50;
+        self.stringe.setCircle(8, 18, 20);
+        self.stringe.setCollideWorldBounds(true);
+
+        self.stringe.play('stringe-fly');
+
+        self.physics.add.collider(self.stringe, worldMap);
+        self.last_stringe_pos = position;
+        self.stringe.setVelocityX(-170);
+      });
 
       // checks for if a new players added onto server
       this.socket.on('newPlayer', function (playerInfo) {
@@ -388,50 +426,86 @@ var GameScene = {
         self.blackdragon.flipX = pos.flip;
       });
 
+      this.socket.on("stringe_pos", function(pos){
+        self.stringe.setX(pos.x);
+        self.stringe.setY(pos.y);
+        self.stringe.flipX = pos.flip;
+      });
+
       // define cursors as standard arrow keys
       cursors = this.input.keyboard.createCursorKeys();
   },
 
   update: function update(){
-    if( 
-        this.blackdragon &&
-        this.last_blackdragon_pos.x == this.blackdragon.x && 
-        this.last_blackdragon_pos.y == this.blackdragon.y && 
-        this.is_controller == true
-      ){
-      //Make it so we can't just go back on 
-      direction = Math.floor((Math.random() * 4));
-      while(direction == this.last_blackdragon_direction){
+    if (this.is_controller == true){
+      if( 
+          this.blackdragon &&
+          this.last_blackdragon_pos.x == this.blackdragon.x && 
+          this.last_blackdragon_pos.y == this.blackdragon.y
+        ){
+        //Make it so we can't just go back on 
         direction = Math.floor((Math.random() * 4));
+        while(direction == this.last_blackdragon_direction){
+          direction = Math.floor((Math.random() * 4));
+        }
+
+        if(direction == 0){
+          this.blackdragon.setVelocityY(0);
+          this.blackdragon.setVelocityX(170);
+          this.blackdragonflipX = true;
+          this.blackdragon.flipX = this.blackdragonflipX;
+        }else if(direction == 1){
+          this.blackdragon.setVelocityY(0);
+          this.blackdragon.setVelocityX(-170);
+          this.blackdragonflipX = false;
+          this.blackdragon.flipX = this.blackdragonflipX;
+        }else if(direction == 2){
+          this.blackdragon.setVelocityX(0);
+          this.blackdragon.setVelocityY(170);
+        }else{
+          this.blackdragon.setVelocityX(0);
+          this.blackdragon.setVelocityY(-170);
+        }
       }
+      if(this.stringe && this.last_stringe_pos.x == this.stringe.x && this.last_stringe_pos.y == this.stringe.y ){
+        //Make it so we can't just go back on 
+        direction = Math.floor((Math.random() * 4));
+        while(direction == this.last_stringe_direction){
+          direction = Math.floor((Math.random() * 4));
+        }
 
-
-      if(direction == 0){
-        this.blackdragon.setVelocityY(0);
-        this.blackdragon.setVelocityX(170);
-        this.flipX = true;
-        this.blackdragon.flipX = this.flipX;
-      }else if(direction == 1){
-        this.blackdragon.setVelocityY(0);
-        this.blackdragon.setVelocityX(-170);
-        this.flipX = false;
-        this.blackdragon.flipX = this.flipX;
-      }else if(direction == 2){
-        this.blackdragon.setVelocityX(0);
-        this.blackdragon.setVelocityY(170);
-      }else{
-        this.blackdragon.setVelocityX(0);
-        this.blackdragon.setVelocityY(-170);
+        if(direction == 0){
+          this.stringe.setVelocityY(0);
+          this.stringe.setVelocityX(170);
+          this.stringeflipX = true;
+          this.stringe.flipX = this.stringeflipX;
+        }else if(direction == 1){
+          this.stringe.setVelocityY(0);
+          this.stringe.setVelocityX(-170);
+          this.stringeflipX = false;
+          this.stringe.flipX = this.stringeflipX;
+        }else if(direction == 2){
+          this.stringe.setVelocityX(0);
+          this.stringe.setVelocityY(170);
+        }else{
+          this.stringe.setVelocityX(0);
+          this.stringe.setVelocityY(-170);
+        }
       }
     }
 
     this.last_blackdragon_pos.x = this.blackdragon.x;
     this.last_blackdragon_pos.y = this.blackdragon.y;
+    this.last_stringe_pos.x = this.stringe.x;
+    this.last_stringe_pos.y = this.stringe.y;
 
     if(this.is_controller){
       //Send the ghost pos
-      var blackdragonPos = {x: this.blackdragon.x, y: this.blackdragon.y, flip: this.flipX};
+      var blackdragonPos = {x: this.blackdragon.x, y: this.blackdragon.y, flip: this.blackdragonflipX};
       this.socket.emit('blackdragon_pos', blackdragonPos);
+
+      var stringePos = {x: this.stringe.x, y: this.stringe.y, flip: this.stringeflipX};
+      this.socket.emit('stringe_pos', stringePos);
     }
 
 
