@@ -167,7 +167,7 @@ var GameScene = {
       //Is this client controlling the ghosts?
       this.is_controller = false;
 
-      this.red_ghost_stuck = false;
+      this.blackdragon_stuck = false;
 
       const waitText = this.add.text(200,50, "Waiting for 4 players");
       waitText.setDepth(1000);
@@ -295,19 +295,19 @@ var GameScene = {
         self.scene.resume();
       })
 
-      this.socket.on('spawn_red_ghost', function(position){
+      this.socket.on('spawn_blackdragon', function(position){
           
-          self.red_ghost = self.physics.add.sprite(self.dotMap[3].x,self.dotMap[3].y, 'blackdragon');
-          self.red_ghost.displayHeight = 60;
-          self.red_ghost.displayWidth = 60;
-          self.red_ghost.setCircle(10, 30, 40);
-          self.red_ghost.setCollideWorldBounds(true);
+          self.blackdragon = self.physics.add.sprite(position.x, position.y, 'blackdragon');
+          self.blackdragon.displayHeight = 60;
+          self.blackdragon.displayWidth = 60;
+          self.blackdragon.setCircle(10, 30, 40);
+          self.blackdragon.setCollideWorldBounds(true);
 
-          self.red_ghost.play('dragon-fly');
+          self.blackdragon.play('dragon-fly');
 
-          self.physics.add.collider(self.red_ghost, worldMap);
-          self.last_red_ghost_pos = position;
-          self.red_ghost.setVelocityX(170);
+          self.physics.add.collider(self.blackdragon, worldMap);
+          self.last_blackdragon_pos = position;
+          self.blackdragon.setVelocityX(170);
       })
 
       // checks for if a new players added onto server
@@ -355,12 +355,12 @@ var GameScene = {
           });
       });
 
-      this.socket.on('red_ghost_controller', function(){
+      this.socket.on('blackdragon_controller', function(){
         console.log("This is the controller")
         self.is_controller = true;
       });
 
-      this.socket.on('new_red_ghost_controller', function(playerInfo){
+      this.socket.on('new_blackdragon_controller', function(playerInfo){
         if(playerInfo.playerId == self.socket.id){
           self.is_controller = true;
         } else {
@@ -381,11 +381,11 @@ var GameScene = {
         });
       });
 
-      this.socket.on("red_ghost_pos", function(pos){
+      this.socket.on("blackdragon_pos", function(pos){
         console.log(self);
-        self.red_ghost.setX(pos.x);
-        self.red_ghost.setY(pos.y);
-        self.red_ghost.flipX = pos.flip;
+        self.blackdragon.setX(pos.x);
+        self.blackdragon.setY(pos.y);
+        self.blackdragon.flipX = pos.flip;
       });
 
       // define cursors as standard arrow keys
@@ -394,44 +394,44 @@ var GameScene = {
 
   update: function update(){
     if( 
-        this.red_ghost &&
-        this.last_red_ghost_pos.x == this.red_ghost.x && 
-        this.last_red_ghost_pos.y == this.red_ghost.y && 
+        this.blackdragon &&
+        this.last_blackdragon_pos.x == this.blackdragon.x && 
+        this.last_blackdragon_pos.y == this.blackdragon.y && 
         this.is_controller == true
       ){
       //Make it so we can't just go back on 
       direction = Math.floor((Math.random() * 4));
-      while(direction == this.last_red_ghost_direction){
+      while(direction == this.last_blackdragon_direction){
         direction = Math.floor((Math.random() * 4));
       }
 
 
       if(direction == 0){
-        this.red_ghost.setVelocityY(0);
-        this.red_ghost.setVelocityX(170);
+        this.blackdragon.setVelocityY(0);
+        this.blackdragon.setVelocityX(170);
         this.flipX = true;
-        this.red_ghost.flipX = this.flipX;
+        this.blackdragon.flipX = this.flipX;
       }else if(direction == 1){
-        this.red_ghost.setVelocityY(0);
-        this.red_ghost.setVelocityX(-170);
+        this.blackdragon.setVelocityY(0);
+        this.blackdragon.setVelocityX(-170);
         this.flipX = false;
-        this.red_ghost.flipX = this.flipX;
+        this.blackdragon.flipX = this.flipX;
       }else if(direction == 2){
-        this.red_ghost.setVelocityX(0);
-        this.red_ghost.setVelocityY(170);
+        this.blackdragon.setVelocityX(0);
+        this.blackdragon.setVelocityY(170);
       }else{
-        this.red_ghost.setVelocityX(0);
-        this.red_ghost.setVelocityY(-170);
+        this.blackdragon.setVelocityX(0);
+        this.blackdragon.setVelocityY(-170);
       }
     }
 
-    this.last_red_ghost_pos.x = this.red_ghost.x;
-    this.last_red_ghost_pos.y = this.red_ghost.y;
+    this.last_blackdragon_pos.x = this.blackdragon.x;
+    this.last_blackdragon_pos.y = this.blackdragon.y;
 
     if(this.is_controller){
       //Send the ghost pos
-      var ghostPos = {x: this.red_ghost.x, y: this.red_ghost.y, flip: this.flipX};
-      this.socket.emit('red_ghost_pos', ghostPos);
+      var blackdragonPos = {x: this.blackdragon.x, y: this.blackdragon.y, flip: this.flipX};
+      this.socket.emit('blackdragon_pos', blackdragonPos);
     }
 
 

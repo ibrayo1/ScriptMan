@@ -18,16 +18,11 @@ const DEBUG_PLAYERS_TO_START = 1;
 //Require the map file so we can sync the dotmap
 var map = require('./public/assets/pacman-map1.json');
 
-//holds the position of the red ghost this tick
-var red_ghost_pos = {
-  x: 1,
-  y: 1,
-  flip: false
-}
-var blue_ghost_pos = {
-  x: 30,
-  y: 30
-}
+//holds the position of the dragon this tick
+var blackdragon_pos = { x: 16, y: 16, flip: false };
+var stringe_pos = { x: 424, y: 24, flip: false };
+var innerrage_pos = { x: 0, y: 0, flip: false };
+var jrreaper = { x: 0, y: 0, flip: false };
 
 //Get the map data
 map = map.layers[0].data;
@@ -41,10 +36,10 @@ for(var i = 0; i < map.length; i++){
   }
 }
 
-var blackdragon = {x: 24, y: 24, vx: 100, vy: 100};
-var stringe = {x: 150, y: 150, vx: -100, vy: 100};
-var innerrage = {x: 200, y: 400, vx: 100, vy: -100};
-var jrreaper = {x: 430, y: 480, vx: -100, vy: -100};
+// var blackdragon = {x: 24, y: 24, vx: 100, vy: 100};
+// var stringe = {x: 150, y: 150, vx: -100, vy: 100};
+// var innerrage = {x: 200, y: 400, vx: 100, vy: -100};
+// var jrreaper = {x: 430, y: 480, vx: -100, vy: -100};
 
 app.use(express.static(__dirname + '/public'));
  
@@ -92,12 +87,12 @@ io.on('connection', function (socket) {
 
   if(numPlayers == 1){
     // tell the game to spawn a red ghost
-    console.log("user is first user, telling them they are ghost controller")
-    socket.emit('red_ghost_controller', red_ghost_pos); 
+    console.log("user is first user, telling them they are dragon controller")
+    socket.emit('blackdragon_controller', blackdragon_pos); 
   }
 
-  socket.emit("spawn_red_ghost", red_ghost_pos);
-  socket.emit("spawn_blue_ghost", blue_ghost_pos);
+  socket.emit("spawn_blackdragon", blackdragon_pos);
+  socket.emit("spawn_stringe", stringe_pos);
 
 
   // update all other players of the new player
@@ -123,7 +118,7 @@ io.on('connection', function (socket) {
 
     // set a random player as the new controller of the ghost
     var socketid = socketIdArray[Math.floor(Math.random() * socketIdArray.length)];
-    socket.broadcast.emit('new_red_ghost_controller', players[socketid]);
+    socket.broadcast.emit('new_blackdragon_controller', players[socketid]);
   });
 
 
@@ -139,17 +134,17 @@ io.on('connection', function (socket) {
     socket.broadcast.emit('playerMoved', players[socket.id]);
   });
 
-  socket.on('red_ghost_pos', function (pos){
-    red_ghost_pos.x = pos.x;
-    red_ghost_pos.y = pos.y;
-    red_ghost_pos.flip = pos.flip;
-    socket.broadcast.emit('red_ghost_pos', red_ghost_pos);
+  socket.on('blackdragon_pos', function (pos){
+    blackdragon_pos.x = pos.x;
+    blackdragon_pos.y = pos.y;
+    blackdragon_pos.flip = pos.flip;
+    socket.broadcast.emit('blackdragon_pos', blackdragon_pos);
   });
 
-  socket.on('blue_ghost_pos', function (pos){
-    blue_ghost_pos.x = pos.x;
-    blue_ghost_pos.y = pos.y;
-    socket.broadcast.emit('blue_ghost_pos', red_ghost_pos);
+  socket.on('stringe_pos', function (pos){
+    stringe_pos.x = pos.x;
+    stringe_pos.y = pos.y;
+    socket.broadcast.emit('stringe_pos', stringe_pos);
   });
 
   socket.on('dotCollected', function (index) {
