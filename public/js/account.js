@@ -6,13 +6,14 @@ class Account {
     //      1: the username the account chooses
     //      2: the ID number the account will be assigned
     // The team color will be chosen later.
-    constructor(id, x, y, rotation, val, name) {
+    constructor(id, x, y, rotation, val, name, color) {
         this.playerId = id;
         this.score = val;
         this.x = x;
         this.y = y;
         this.rotation = rotation;
         this.username = name;
+        this.color = color;
     }
 }
 exports.Account = Account;

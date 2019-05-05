@@ -266,7 +266,7 @@ var GameScene = {
           if (players[id].playerId === self.socket.id) {
               self.pacman = self.physics.add.sprite(rand.x, rand.y, 'pacman');
               self.pacman.setCircle(8, 8, 8);
-              // self.pacman.tint =  0xff00ff; can use this to change color of pacman
+              self.pacman.tint =  players[id].color;
               self.pacman.setCollideWorldBounds(true);
 
               // play the animation
@@ -283,6 +283,7 @@ var GameScene = {
               self.otherPlayer = self.physics.add.sprite(players[id].x, players[id].y, 'pacman');
               self.physics.add.overlap(self.otherPlayer, self.dots, collectDot, null, this);
               self.otherPlayer.setCircle(8, 8, 8);
+              self.otherPlayer.tint = players[id].color;
               self.otherPlayer.setCollideWorldBounds(true);
               
               // play the animation
@@ -376,6 +377,7 @@ var GameScene = {
       this.socket.on('newPlayer', function (playerInfo) {
         self.otherPlayer = self.physics.add.sprite(playerInfo.x, playerInfo.y, 'pacman');
         self.otherPlayer.setCircle(8, 8, 8);
+        self.otherPlayer.tint = playerInfo.color;
         self.otherPlayer.setCollideWorldBounds(true);
 
         self.physics.add.overlap(self.otherPlayer, self.dots, collectDot, null, this);
