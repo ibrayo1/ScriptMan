@@ -147,6 +147,7 @@ var GameScene = {
 
   preload: function preload(){
       // graphics (C)opyright Namco
+      this.load.image('power_dot', 'assets/power_dot.png');
       this.load.image('dot', 'assets/dot.png');
       this.load.image('Hallenbeck', 'assets/Hallenbeck.png', {frameWidth: 32, frameHeight: 32});
       this.load.image('tiles', 'assets/pacman-tiles.png');
@@ -195,9 +196,13 @@ var GameScene = {
         key: 'dots'
       });
 
+      this.enemies = this.physics.add.group({
+        key: 'enemies'
+      });
+
       // this removes all the dots from the map
       worldMap.forEachTile( tile => {
-          if (tile.index === 7) {
+          if (tile.index === 7 || tile.index == 35) {
           // A sprite has its origin at the center, so get the origin of the tile
           const x = tile.getCenterX();
           const y = tile.getCenterY();
@@ -299,19 +304,6 @@ var GameScene = {
           });
       });
 
-      //Listen for the incoming dotmap
-      this.socket.on('dotMap', function (dotArray) {
-        console.log("Got dotmap")
-        console.log(dotArray);
-        for(var i = 0; i < dotArray.length; i++){
-          if(dotArray[i] == 1){
-            var dot = self.physics.add.image(self.dotMap[i].x, self.dotMap[i].y, 'dot');
-            dot.mapIndex = i;
-            self.dots.add(dot);
-          }
-        }
-      });
-
       this.socket.on('startGame', function(){
         console.log("fuck");
         waitText.destroy();
@@ -328,6 +320,7 @@ var GameScene = {
           self.blackdragon.play('dragon-fly');
 
           self.physics.add.collider(self.blackdragon, worldMap);
+          self.enemies.add(self.blackdragon);
           self.last_blackdragon_pos = position;
           self.blackdragon.setVelocityX(170);
       });
@@ -338,6 +331,7 @@ var GameScene = {
         self.stringe.displayWidth = 50;
         self.stringe.setCircle(8, 18, 20);
         self.stringe.setCollideWorldBounds(true);
+        self.enemies.add(self.stringe);
 
         self.stringe.play('stringe-fly');
 
@@ -351,6 +345,10 @@ var GameScene = {
         self.innerrage.displayHeight = 60;
         self.innerrage.displayWidth = 60;
         self.innerrage.setCircle(17, 60, 93);
+        self.enemies.add(self.stringe);
+
+        self.enemies.add(self.innerrage);        
+
 
         self.innerrage.play('innerrage-stand');
 
@@ -363,7 +361,7 @@ var GameScene = {
         self.jrreaper = self.physics.add.sprite(position.x, position.y, 'jrreaper');
         self.jrreaper.setCircle(8, 15, 15);
         self.jrreaper.play('jrreaper-anim');
-        
+        self.enemies.add(self.jrreaper);        
         self.physics.add.collider(self.jrreaper, worldMap);
         self.last_jrreaper_pos = position;
         self.jrreaper.setVelocityX(-170);
@@ -442,7 +440,6 @@ var GameScene = {
       });
 
       this.socket.on("blackdragon_pos", function(pos){
-        console.log(self);
         self.blackdragon.setX(pos.x);
         self.blackdragon.setY(pos.y);
         self.blackdragon.flipX = pos.flip;
@@ -466,11 +463,27 @@ var GameScene = {
         self.jrreaper.flipX = pos.flip;
       });
 
+      //Listen for the incoming dotmap
+      this.socket.on('dotMap', function (dotArray) {
+        console.log("Got dotmap")
+        console.log(dotArray);
+        for(var i = 0; i < dotArray.length; i++){
+          if(dotArray[i] == 1){
+            var dot = self.physics.add.image(self.dotMap[i].x, self.dotMap[i].y, 'dot');
+            dot.mapIndex = i;
+            self.dots.add(dot);
+          }else if(dotArray[i] == 2){
+            var dot = self.physics.add.image(self.dotMap[i].x, self.dotMap[i].y, 'power_dot')
+            self.dots.add(dot);
+          }
+        }
+      });
+
       // define cursors as standard arrow keys
       cursors = this.input.keyboard.createCursorKeys();
   },
 
-  update: function update(){
+  update: function update(){  
     if (this.is_controller == true){
       if( 
           this.blackdragon &&
@@ -605,6 +618,8 @@ var GameScene = {
 
     if(this.pacman){
       this.physics.add.overlap(this.pacman, this.dots, collectDot, null, this);
+      this.physics.add.overlap(this.pacman, this.enemies, enemyCollide, null, this);
+
       // Horizontal movement
       if (cursors.left.isDown) {
         this.pacman.body.setVelocityX(-150);
@@ -640,11 +655,28 @@ var GameScene = {
   }
 }
 
+
 //Handle the collections of a dot
 function collectDot(player, star){
   if(this.socket)
     this.socket.emit('dotCollected', star.mapIndex)
   star.destroy();
+}
+
+function enemyCollide(player, enemy){
+  console.log(player);
+  console.log(enemy);
+  console.log(this.socket);
+  if(this.socket){
+    this.socket.emit('disconnect');
+    this.socket.disconnect();
+  }
+  const waitText = this.add.text(200,50, "You lost!");
+  waitText.setDepth(1000);
+  waitText.setBackgroundColor("#000000")
+  waitText.setFontSize(24);
+  player.destroy();
+
 }
 
 var game = new Phaser.Game({
