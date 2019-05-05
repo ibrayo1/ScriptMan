@@ -12,7 +12,6 @@ var dot = {
   y: 24
 };
 var numPlayers = 0;
-
 const DEBUG_PLAYERS_TO_START = 1;
 
 //Require the map file so we can sync the dotmap
@@ -33,8 +32,12 @@ var dotArray = [];
 for(var i = 0; i < map.length; i++){
   if(map[i] == 7){
     dotArray.push(1);
+  }else if(map[i] == 35){
+    dotArray.push(2);
   }
 }
+
+var sockets = [];
 
 app.use(express.static(__dirname + '/public'));
  
@@ -43,6 +46,7 @@ app.get('/', function (req, res) {
 });
 
 io.on('connection', function (socket) {
+  sockets.push(socket);
   numPlayers++;
   console.log('a user connected');
   // create a new player and add it to our players object
@@ -69,6 +73,18 @@ io.on('connection', function (socket) {
   if(numPlayers >= DEBUG_PLAYERS_TO_START){
     console.log("Starting game")
     io.emit('startGame');
+    //Reset the dot map every 20 seconds
+    setTimeout(function(){
+      var dotArray = [];
+      for(var i = 0; i < map.length; i++){
+        if(map[i] == 7){
+          dotArray.push(1);
+        }else if(map[i] == 35){
+          dotArray.push(2);
+        }
+      }
+      socket.broadcast.emit('dotArray')
+    }, 15000)
     socket.broadcast.emit('startGame');
   }
 
@@ -113,6 +129,16 @@ io.on('connection', function (socket) {
     if (index > -1) {
       socketIdArray.splice(index, 1);
     }
+
+    var dotArray = [];
+    for(var i = 0; i < map.length; i++){
+      if(map[i] == 7){
+        dotArray.push(1);
+      }else if(map[i] == 35){
+        dotArray.push(2);
+      }
+    }
+    socket.broadcast.emit("dotMap", dotArray);
 
     // set a random player as the new controller of the ghost
     var socketid = socketIdArray[Math.floor(Math.random() * socketIdArray.length)];

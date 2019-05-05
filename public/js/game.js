@@ -8,6 +8,9 @@ var NameInputScene = {
     this.load.image('rub', 'assets/input/rub.png')
     this.load.image('end', 'assets/input/end.png')
     this.load.bitmapFont('arcade', 'assets/fonts/bitmap/arcade.png', 'assets/fonts/bitmap/arcade.xml')
+    this.load.audio('move-blip', "assets/sounds/tone1.ogg");
+    this.load.audio('zap', "assets/sounds/zap1.ogg");
+
   },
 
   create: function create(){
@@ -80,6 +83,8 @@ var NameInputScene = {
             }
             else if (cursor.x === 8 && cursor.y === 2 && name.length > 0)
             {
+              this.sound.play('zap');
+
                 //  Rub
                 name = name.substr(0, name.length - 1);
 
@@ -129,12 +134,15 @@ var NameInputScene = {
         {
             //  Submit
             usrname = name;
+            this.sound.play('zap');
+
             this.scene.launch('GameScene');
         }
         else if (name.length < 7)
         {
             //  Add
             name = name.concat(char);
+            this.sound.play('move-blip');
 
             playerText.text = name;
         }
@@ -147,7 +155,7 @@ var GameScene = {
 
   preload: function preload(){
       // graphics (C)opyright Namco
-      this.load.image('power_dot', 'assets/power_dot.png');
+      this.load.image('power_dot', 'assets/dot.png');
       this.load.image('dot', 'assets/dot.png');
       this.load.image('Hallenbeck', 'assets/Hallenbeck.png', {frameWidth: 32, frameHeight: 32});
       this.load.image('tiles', 'assets/pacman-tiles.png');
@@ -157,6 +165,9 @@ var GameScene = {
       this.load.spritesheet('innerrage', 'assets/InnerRage.png', {frameWidth: 139, frameHeight: 181});
       this.load.spritesheet('jrreaper', 'assets/JrReaper.png', {frameWidth: 42, frameHeight: 41});
       this.load.spritesheet('red_ghost', 'assets/red_ghost.png', {frameWidth: 32, frameHeight: 32});
+      this.load.audio('chomp1', 'assets/sounds/pacman_chomp1.wav')
+      this.load.audio('chomp2', 'assets/sounds/pacman_chomp2.wav')
+
 
       this.load.tilemapTiledJSON('map-with-dots', 'assets/pacman-map1.json');
   },
@@ -658,6 +669,14 @@ var GameScene = {
 
 //Handle the collections of a dot
 function collectDot(player, star){
+  console.log(this.next_chomp);
+  if(this.next_chomp == 1){
+    this.chomp = this.sound.play('chomp1');
+    this.next_chomp = 2;
+  }else{
+    this.next_chomp = 1;
+    this.chomp = this.sound.play('chomp2');
+  }
   if(this.socket)
     this.socket.emit('dotCollected', star.mapIndex)
   star.destroy();
@@ -675,6 +694,18 @@ function enemyCollide(player, enemy){
   waitText.setDepth(1000);
   waitText.setBackgroundColor("#000000")
   waitText.setFontSize(24);
+
+  const againText = this.add.text(200,150, "Click to play again!");
+  againText.setDepth(1000);
+  againText.setBackgroundColor("#000000")
+  againText.setFontSize(24);
+  againText.setInteractive();
+
+  againText.on('pointerdown', ()=>{
+    location.reload();
+  })
+
+  this.pacman = null;
   player.destroy();
 
 }
