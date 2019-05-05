@@ -8,13 +8,9 @@ var NameInputScene = {
     this.load.image('rub', 'assets/input/rub.png')
     this.load.image('end', 'assets/input/end.png')
     this.load.bitmapFont('arcade', 'assets/fonts/bitmap/arcade.png', 'assets/fonts/bitmap/arcade.xml')
-    this.load.audio('intro_audio', 'assets/audios/pacman_beginning.wav', {instances: 1});
   },
 
   create: function create(){
-    this.sound.add('intro_audio');
-    this.sound.play('intro_audio');
-
     var chars= [ 
       ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'], 
       ['K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'], 
