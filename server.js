@@ -71,20 +71,9 @@ io.on('connection', function (socket) {
   });
 
   if(numPlayers >= DEBUG_PLAYERS_TO_START){
-    console.log("Starting game")
+    console.log(numPlayers);
+    console.log("Sufficient players, starting")
     io.emit('startGame');
-    //Reset the dot map every 20 seconds
-    setTimeout(function(){
-      var dotArray = [];
-      for(var i = 0; i < map.length; i++){
-        if(map[i] == 7){
-          dotArray.push(1);
-        }else if(map[i] == 35){
-          dotArray.push(2);
-        }
-      }
-      socket.broadcast.emit('dotArray')
-    }, 15000)
     socket.broadcast.emit('startGame');
   }
 
