@@ -671,11 +671,13 @@ var GameScene = {
 function collectDot(player, star){
   console.log(this.next_chomp);
   if(this.next_chomp == 1){
-    this.chomp = this.sound.play('chomp1');
+    if(this.sound)
+      this.sound.play('chomp1');
     this.next_chomp = 2;
   }else{
     this.next_chomp = 1;
-    this.chomp = this.sound.play('chomp2');
+    if(this.sound)
+      this.sound.play('chomp2');
   }
   if(this.socket)
     this.socket.emit('dotCollected', star.mapIndex)
