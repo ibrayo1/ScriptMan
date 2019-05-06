@@ -14,8 +14,6 @@ var dot = {
 var numPlayers = 0;
 const DEBUG_PLAYERS_TO_START = 4;
 
-const PORT = process.env.PORT || 3000
-
 //Require the map file so we can sync the dotmap
 var map = require('./public/assets/pacman-map1.json');
 
@@ -199,6 +197,6 @@ io.on('connection', function (socket) {
   });
 });
 
-server.listen(PORT, function () {
-  console.log(`Listening on ${ PORT }`);
+server.listen(3000, function () {
+  console.log(`Listening on ${server.address().port}`);
 });
