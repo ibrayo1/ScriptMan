@@ -196,9 +196,7 @@ io.on('connection', function (socket) {
     socket.broadcast.emit('removeDot', index);
   });
 });
-/*
+
 server.listen(3000, function () {
   console.log(`Listening on ${server.address().port}`);
 });
-*/
-server.listen(PORT, () => console.log(`Listening on ${ PORT }`));
