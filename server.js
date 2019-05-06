@@ -130,14 +130,15 @@ io.on('connection', function (socket) {
       socketIdArray.splice(index, 1);
     }
 
-    var dotArray = [];
+    newArray = [];
     for(var i = 0; i < map.length; i++){
       if(map[i] == 7){
-        dotArray.push(1);
+        newArray.push(1);
       }else if(map[i] == 35){
-        dotArray.push(2);
+        newArray.push(2);
       }
     }
+    dotArray = newArray;
     socket.broadcast.emit("dotMap", dotArray);
 
     // set a random player as the new controller of the ghost
