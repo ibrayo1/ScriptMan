@@ -12,7 +12,7 @@ var dot = {
   y: 24
 };
 var numPlayers = 0;
-const DEBUG_PLAYERS_TO_START = 1;
+const DEBUG_PLAYERS_TO_START = 4;
 
 //Require the map file so we can sync the dotmap
 var map = require('./public/assets/pacman-map1.json');
